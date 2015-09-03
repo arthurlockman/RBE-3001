@@ -41,7 +41,7 @@
  *
  * @todo Create a way to set a port's pins to inputs or outputs.
  */
-void setPinsDir(char port, int dir, char numPins, ...);
+void setPinsDir(char port, int dir, int numPins, ...);
 
 /**
  * @brief Gets the value on the specified pins of a port.
