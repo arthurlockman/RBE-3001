@@ -34,6 +34,8 @@
 #define LOW     0
 #define TRUE    1
 #define FALSE   0
+#define PUSHED 0
+#define NOT_PUSHED 1
 
 //Some datatypes which some people like to use
 #define BOOL unsigned char
