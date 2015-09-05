@@ -18,6 +18,22 @@
 #define ADC_H_
 
 /**
+ * An enum to hold the different init modes for the ADC.
+ * @see Page 262 of datasheet.
+ */
+typedef enum
+{
+	ADC_FREE_RUNNING = 1,
+	ADC_ANALOG_COMPARATOR,
+	ADC_EXT_INT,
+	ADC_TIMER0_COMPARE,
+	ADC_TIMER0_OVERFLOW,
+	ADC_TIMER1_COMPARE,
+	ADC_TIMER1_OVERFLOW,
+	ADC_TIMER1_CAPTURE
+} adcMode;
+
+/**
  * @brief Initializes the ADC and make one channel active.
  * You can choose to use either interrupts or polling to read
  * the desired channel.
@@ -27,7 +43,7 @@
  * @todo Create the corresponding function to initialize the ADC
  * using the channel parameter.
  */
-void initADC(int channel);
+void initADC(int channel, adcMode mode);
 
 /**
  * @brief Disables ADC functionality and clears any saved values (globals).

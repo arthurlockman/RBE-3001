@@ -17,12 +17,12 @@
  * @todo Create the corresponding function to initialize the ADC
  * using the channel parameter.
  */
-void initADC(int channel)
+void initADC(int channel, adcMode mode)
 {
 	// For these bits, see page 249 of the guide
 	ADEN = 0b1;				// Set the ADC Enable bit (ADEN) to 1
 	ADSC = 0b1;				// Set the ADC start conversion bit (ADSC) to 1
-	ADIE = 0b1;				// Sets the ADC to use it's interrupt flag (ADIF) (ADC Interrupt Enable)
+	ADIE = 0b1;	// Sets the ADC to use it's interrupt flag (ADIF) (ADC Interrupt Enable)
 }
 
 /**
@@ -47,7 +47,21 @@ void clearADC(int channel);
  * @todo Create the corresponding function to obtain the value of the
  * last calculation if you are using polling.
  */
-unsigned short getADC(int channel);
+unsigned short getADC(int channel)
+{
+	ADCSRA &= !BITS(ADATE);
+	ADCSRA |= BITS(ADSC);
+	while (ADCSRA & BITS(ADSC))
+		;
+	if (ADMUX & BITS(ADLAR)) //Left adjusted
+	{
+
+	}
+	else //right adjusted
+	{
+
+	}
+}
 
 /**
  * @brief Change the channel the ADC is sampling if using interrupts.
