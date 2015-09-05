@@ -48,22 +48,30 @@ void clearADC(int channel);
  * @todo Create the corresponding function to obtain the value of the
  * last calculation if you are using polling.
  */
-unsigned short getADC(int channel)
+UINT16 getADC(int channel)
 {
-	ADCSRA &= !BITS(ADATE);
-	ADCSRA |= BITS(ADSC);
-	while (ADCSRA & BITS(ADSC))
+	ADCSRA &= !BIT(ADATE);
+	ADCSRA |= BIT(ADSC);
+	while (ADCSRA & BIT(ADSC))
 		;
-	if (ADMUX & BITS(ADLAR)) //Left adjusted
-	{
+	return getADCValue();
+}
 
+UINT16 getADCValue()
+{
+	if (ADMUX & BIT(ADLAR)) //Left adjusted
+	{
+		UINT16 val = ADCH << 2;
+		val |= (ADCL & 0b11000000) >> 6;
+		return val;
 	}
 	else //right adjusted
 	{
-
+		UINT16 val = (ADCH & 0b00000011) << 8;
+		val |= ADCL;
+		return val;
 	}
 }
-
 /**
  * @brief Change the channel the ADC is sampling if using interrupts.
  *
@@ -71,4 +79,42 @@ unsigned short getADC(int channel)
  *
  * @todo Create a way to switch ADC channels if you are using interrupts.
  */
-void changeADC(int channel);
+void changeADC(int channel)
+{
+	switch (channel)
+	{
+	case 0:
+		ADMUX &= 0b11100000;
+		break;
+	case 1:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000001;
+		break;
+	case 2:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000010;
+		break;
+	case 3:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000011;
+		break;
+	case 4:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000100;
+		break;
+	case 5:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000101;
+		break;
+	case 6:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000110;
+		break;
+	case 7:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00000111;
+		break;
+	default:
+		break;
+	}
+}

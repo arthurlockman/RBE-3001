@@ -34,6 +34,19 @@ typedef enum
 } adcMode;
 
 /**
+ * An enum to hold the register settings for the different
+ * possible voltage reference settings.
+ * @see Page 258 of the datasheet.
+ */
+typedef enum
+{
+	ADC_REF_EXT = 0b00000000,
+	ADC_REF_VCC = 0b01000000,
+	ADC_REF_11  = 0b10000000,
+	ADC_REF_256 = 0b11000000,
+} adcVref;
+
+/**
  * @brief Initializes the ADC and make one channel active.
  * You can choose to use either interrupts or polling to read
  * the desired channel.
@@ -67,7 +80,15 @@ void clearADC(int channel);
  * @todo Create the corresponding function to obtain the value of the
  * last calculation if you are using polling.
  */
-unsigned short getADC(int channel);
+UINT16 getADC(int channel);
+
+/**
+ * @brief Gets the ADC value and properly left or right adjusts it
+ * based on the current settings.
+ *
+ * @return A UINT16, the raw value of the ADC.
+ */
+UINT16 getADCValue();
 
 /**
  * @brief Change the channel the ADC is sampling if using interrupts.
