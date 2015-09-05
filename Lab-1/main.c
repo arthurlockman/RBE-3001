@@ -21,8 +21,8 @@ int main(void)
 	{
 		printf("Reading... ");
 	    long val = getADC(7);
-		printf("Value1: %d\n\r", ADCSRA);
-		_delay_ms(1000);
+		printf("%ld\n\r", val);
+		_delay_ms(10);
 	}
 
 	return 0;
