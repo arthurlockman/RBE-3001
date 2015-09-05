@@ -45,7 +45,18 @@ void initADC(int channel, adcMode mode)
  * @todo Create the corresponding function to clear the last ADC
  * calculation register and disconnect the input to the ADC if desired.
  */
-void clearADC(int channel);
+void clearADC(int channel)
+{
+	// For these bits, see page 259 of the guide
+	// Disable the ADC
+	ADCSRA &= (BIT(ADEN) & 0) | BIT(ADSC) | BIT(ADATE) | BIT(ADIF) | BIT(ADIE) | BIT(ADPS2) | BIT(ADPS1) | BIT(ADPS0);
+
+	// Clear the data registers
+	ADCH = 0b00000000;
+	ADCL = 0b00000000;
+
+	changeADC(-1);
+}
 
 /**
  * @brief Run a conversion on and get the analog value from one ADC
@@ -126,6 +137,8 @@ void changeADC(int channel)
 		ADMUX |= 0b00000111;
 		break;
 	default:
+		ADMUX &= 0b11100000;
+		ADMUX |= 0b00011111;
 		break;
 	}
 }
