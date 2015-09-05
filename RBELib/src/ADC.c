@@ -20,10 +20,21 @@
 void initADC(int channel, adcMode mode)
 {
 	// For these bits, see page 259 of the guide
-	ADCSRA |= BIT(ADEN) | (BIT(ADSC) & 0) | BIT(ADATE) | (BIT(ADIF) & 0) | BIT(ADIE) | BIT(ADPS2) | BIT(ADPS1) | BIT(ADPS0);
+	// Enable the ADC, allow interrupts, and set the clock division
+	ADCSRA = BIT(ADEN) | (BIT(ADSC) & 0) | (BIT(ADATE) & 0) | (BIT(ADIF) & 0) | BIT(ADIE) | BIT(ADPS2) | BIT(ADPS1) | BIT(ADPS0);
 
 	// For these bits, see page 262 of the guide
+	// Set the trigger mode for the ADC
+	ADCSRB &= 0b11111000;
 	ADCSRB |= mode;
+
+	// For these bits, see page 258 of the guide.
+	// Set the voltage reference
+	ADMUX &= 0b00111111;
+	ADMUX |= adcVref;
+
+	// Set the input channel
+	changeADC(channel);
 }
 
 /**
