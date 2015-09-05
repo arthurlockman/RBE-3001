@@ -56,7 +56,7 @@ typedef enum
  * @todo Create the corresponding function to initialize the ADC
  * using the channel parameter.
  */
-void initADC(int channel, adcMode mode);
+void initADC(int channel, adcMode mode, adcVref vref);
 
 /**
  * @brief Disables ADC functionality and clears any saved values (globals).

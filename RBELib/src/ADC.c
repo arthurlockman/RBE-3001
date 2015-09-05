@@ -17,7 +17,7 @@
  * @todo Create the corresponding function to initialize the ADC
  * using the channel parameter.
  */
-void initADC(int channel, adcMode mode)
+void initADC(int channel, adcMode mode, adcVref vref)
 {
 	// For these bits, see page 259 of the guide
 	// Enable the ADC, allow interrupts, and set the clock division
@@ -31,7 +31,7 @@ void initADC(int channel, adcMode mode)
 	// For these bits, see page 258 of the guide.
 	// Set the voltage reference
 	ADMUX &= 0b00111111;
-	ADMUX |= adcVref;
+	ADMUX |= vref;
 
 	// Set the input channel
 	changeADC(channel);
@@ -72,6 +72,7 @@ void clearADC(int channel)
  */
 UINT16 getADC(int channel)
 {
+	changeADC(channel);
 	ADCSRA &= !BIT(ADATE);
 	ADCSRA |= BIT(ADSC);
 	while (ADCSRA & BIT(ADSC))
