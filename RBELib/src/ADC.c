@@ -72,12 +72,14 @@ void clearADC(int channel)
  */
 UINT16 getADC(int channel)
 {
-	changeADC(channel);
-	ADCSRA &= !BIT(ADATE);
-	ADCSRA |= BIT(ADSC);
-	while (ADCSRA & BIT(ADSC))
-		;
-	return getADCValue();
+
+	//changeADC(channel);
+//	ADCSRA &= !BIT(ADATE);
+//	ADCSRA |= BIT(ADSC);
+//	while (ADCSRA & BIT(ADSC))
+//		;
+//	return getADCValue();
+	return 1;
 }
 
 UINT16 getADCValue()
