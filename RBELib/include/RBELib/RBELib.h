@@ -45,6 +45,9 @@
 #define UINT16 unsigned short int
 #define WORD unsigned short int
 
+//Bitmask Macro
+#define BIT(n) (1 << (n))
+
 //RBELib headers
 #include "ADC.h"
 #include "DAC.h"
