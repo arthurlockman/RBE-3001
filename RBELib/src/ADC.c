@@ -19,10 +19,11 @@
  */
 void initADC(int channel, adcMode mode)
 {
-	// For these bits, see page 249 of the guide
-	ADEN = 0b1;				// Set the ADC Enable bit (ADEN) to 1
-	ADSC = 0b1;				// Set the ADC start conversion bit (ADSC) to 1
-	ADIE = 0b1;	// Sets the ADC to use it's interrupt flag (ADIF) (ADC Interrupt Enable)
+	// For these bits, see page 259 of the guide
+	ADCSRA |= BIT(ADEN) | (BIT(ADSC) & 0) | BIT(ADATE) | (BIT(ADIF) & 0) | BIT(ADIE) | BIT(ADPS2) | BIT(ADPS1) | BIT(ADPS0);
+
+	// For these bits, see page 262 of the guide
+	ADCSRB |= mode;
 }
 
 /**
