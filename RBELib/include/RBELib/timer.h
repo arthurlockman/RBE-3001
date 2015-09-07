@@ -46,6 +46,6 @@ void initTimer(int timer, int mode, unsigned int comp);
  *
  * @todo Create a function that will set a new compare value for the given timer.
  */
-void setCompValue(unsigned char timer, unsigned short int comp);
+void setCompValue(unsigned char timer, unsigned long int comp);
 
 #endif /* TIMER_H_ */

@@ -27,14 +27,20 @@ void initTimer(int timer, int mode, unsigned int comp)
 		case 1:
 			break;
 		case 2: //CTC mode
-			TCCR1A &= 0b11111110;
-			TCCR1A |= 0b00000010;
-			TCCR1B &= 0b11111011;
+			TCCR0A &= 0b11111110;
+			TCCR0A |= 0b00000010;
+			TCCR0B &= 0b11111011;
 			break;
 		}
 		setCompValue(0,comp);
 		break;
+
+
 	case 1: //Timer 1
+		//Clock source, no prescaling for now
+		//to change the prescaling, see page 100
+		TCCR1B &= 0b11111001;
+		TCCR1B |= 0b00000001;
 		switch (mode)
 		{
 		case 0: //Normal mode
@@ -49,8 +55,16 @@ void initTimer(int timer, int mode, unsigned int comp)
 			TCCR1B &= 0b11111011;
 			break;
 		}
+		setCompValue(1,comp);
 		break;
+
+
 	case 2:	//Timer 2
+		//Clock source, no prescaling for now
+		//to change the prescaling, see page 100
+		TCCR2B &= 0b11111001;
+		TCCR2B |= 0b00000001;
+
 		switch (mode)
 		{
 		case 0: //Normal mode
@@ -67,12 +81,11 @@ void initTimer(int timer, int mode, unsigned int comp)
 		}
 		setCompValue(2,comp);
 		break;
-
 	}
 
 }
 
-void setCompValue(unsigned char timer, unsigned short int comp)
+void setCompValue(unsigned char timer, unsigned long int comp)
 {
 	switch (timer)
 	{
