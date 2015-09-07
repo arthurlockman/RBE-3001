@@ -48,6 +48,12 @@
 //Bitmask Macro
 #define BIT(n) (1 << (n))
 
+//enable global interupts
+#define sie() (SREG |= 0b10000000)
+
+//clear global interupt flags
+#define sie() (SREG &= 0b01111111)
+
 //RBELib headers
 #include "ADC.h"
 #include "DAC.h"
