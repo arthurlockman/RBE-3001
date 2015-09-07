@@ -125,7 +125,7 @@ void setPinsVal(char port, int val, int numPins, ...)
 }
 
 // Gets the value from the specified. Any error will return a value of 0b1111;
-unsigned char getPinsVal(char port, int numPins, ...)
+unsigned int getPinsVal(char port, int numPins, ...)
 {
 	va_list listPointer;								// pointer to the ...
 	va_start(listPointer, numPins);					// Initializing the pointer
@@ -147,10 +147,9 @@ unsigned char getPinsVal(char port, int numPins, ...)
 		portPointer = &PINDbits;
 		break;
 	default:
-		return 0b1111;
 		break;
 	}
-
+	unsigned int output = 0;
 	for (int i = 0; i < numPins; i++)
 	{
 		int pin = va_arg(listPointer, int);
@@ -158,35 +157,34 @@ unsigned char getPinsVal(char port, int numPins, ...)
 		switch (pin)
 		{
 		case PORT0:
-			return portPointer->_P0;
+			output |= (0b00000000 | portPointer->_P0);
 			break;
 		case PORT1:
-			return portPointer->_P1;
+			output |= (0b00000000 | portPointer->_P1) << 1;
 			break;
 		case PORT2:
-			return portPointer->_P2;
+			output |= (0b00000000 | portPointer->_P2) << 2;
 			break;
 		case PORT3:
-			return portPointer->_P3;
+			output |= (0b00000000 | portPointer->_P3) << 3;
 			break;
 		case PORT4:
-			return portPointer->_P4;
+			output |= (0b00000000 | portPointer->_P4) << 4;
 			break;
 		case PORT5:
-			return portPointer->_P5;
+			output |= (0b00000000 | portPointer->_P5) << 5;
 			break;
 		case PORT6:
-			return portPointer->_P6;
+			output |= (0b00000000 | portPointer->_P6) << 6;
 			break;
 		case PORT7:
-			return portPointer->_P7;
+			output |= (0b00000000 | portPointer->_P7) << 7;
 			break;
 		default:
-			return 0b1111;
 			break;
 		}
 	}
-	return 0b1111;
+	return output;
 
 }
 
