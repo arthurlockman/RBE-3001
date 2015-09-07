@@ -157,28 +157,28 @@ unsigned int getPinsVal(char port, int numPins, ...)
 		switch (pin)
 		{
 		case PORT0:
-			output |= (0b00000000 | portPointer->_P0);
+			output |= (0b00000000 | !portPointer->_P0);
 			break;
 		case PORT1:
-			output |= (0b00000000 | portPointer->_P1) << 1;
+			output |= (0b00000000 | !portPointer->_P1) << 1;
 			break;
 		case PORT2:
-			output |= (0b00000000 | portPointer->_P2) << 2;
+			output |= (0b00000000 | !portPointer->_P2) << 2;
 			break;
 		case PORT3:
-			output |= (0b00000000 | portPointer->_P3) << 3;
+			output |= (0b00000000 | !portPointer->_P3) << 3;
 			break;
 		case PORT4:
-			output |= (0b00000000 | portPointer->_P4) << 4;
+			output |= (0b00000000 | !portPointer->_P4) << 4;
 			break;
 		case PORT5:
-			output |= (0b00000000 | portPointer->_P5) << 5;
+			output |= (0b00000000 | !portPointer->_P5) << 5;
 			break;
 		case PORT6:
-			output |= (0b00000000 | portPointer->_P6) << 6;
+			output |= (0b00000000 | !portPointer->_P6) << 6;
 			break;
 		case PORT7:
-			output |= (0b00000000 | portPointer->_P7) << 7;
+			output |= (0b00000000 | !portPointer->_P7) << 7;
 			break;
 		default:
 			break;

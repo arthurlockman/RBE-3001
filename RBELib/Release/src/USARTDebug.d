@@ -1,5 +1,5 @@
-src/CoProcessor/SetServo.d src/CoProcessor/SetServo.o:  \
- ../src/CoProcessor/SetServo.c .././include/RBELib/RBELib.h \
+src/USARTDebug.d src/USARTDebug.o: ../src/USARTDebug.c \
+  .././include/RBELib/USARTDebug.h .././include/RBELib/RBELib.h \
   .././include/RBELib/ADC.h .././include/RBELib/DAC.h \
   .././include/RBELib/Debug.h .././include/RBELib/motors.h \
   .././include/RBELib/USARTDebug.h .././include/RBELib/timer.h \
@@ -7,6 +7,8 @@ src/CoProcessor/SetServo.d src/CoProcessor/SetServo.o:  \
   .././include/RBELib/PID.h .././include/RBELib/reg_structs.h \
   .././include/RBELib/ports.h .././include/RBELib/SPI.h \
   .././include/RBELib/SetServo.h .././include/RBELib/SlaveSelects.h
+
+.././include/RBELib/USARTDebug.h:
 
 .././include/RBELib/RBELib.h:
 
