@@ -77,16 +77,16 @@ void setPinsVal(char port, int val, int numPins, ...)
 	switch (port)
 	{
 	case 'A':
-		portPointer = &PINAbits;
+		portPointer = &PORTAbits;
 		break;
 	case 'B':
-		portPointer = &PINBbits;
+		portPointer = &PORTBbits;
 		break;
 	case 'C':
-		portPointer = &PINCbits;
+		portPointer = &PORTCbits;
 		break;
 	case 'D':
-		portPointer = &PINDbits;
+		portPointer = &PORTDbits;
 		break;
 	}
 
