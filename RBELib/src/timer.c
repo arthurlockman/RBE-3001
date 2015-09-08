@@ -105,17 +105,10 @@ void initTimer(int timer, int mode, unsigned int comp)
 	switch (timer)
 	{
 	case 0:	//Timer 0
-		//Clock source, no prescaling for now
-		//to change the prescaling, see page 100
-		TCCR0B &= 0b11111001;
-		TCCR0B |= 0b00000001;
-
 		TCCR0A = 0b00000000;
-//		TCCR0B &= 0b11111011;
+		TCCR0B = 0b00000010;
 		TIMSK0 = 0b00000001;
 		break;
-
-
 	case 1: //Timer 1
 		//Clock source, no prescaling for now
 		//to change the prescaling, see page 100
@@ -137,7 +130,6 @@ void initTimer(int timer, int mode, unsigned int comp)
 		}
 		setCompValue(1, comp);
 		break;
-
 	case 2:	//Timer 2
 		//Clock source, no prescaling for now
 		//to change the prescaling, see page 100
@@ -161,7 +153,6 @@ void initTimer(int timer, int mode, unsigned int comp)
 		setCompValue(2, comp);
 		break;
 	}
-
 }
 
 void setCompValue(unsigned char timer, unsigned int comp)
