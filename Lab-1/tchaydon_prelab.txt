@@ -1,0 +1,71 @@
+/*
+ * prelab.c
+ *
+ *  Created on: Sep 2, 2015
+ *      Author: Tucker Haydon
+ */
+
+#include <RBELib/RBELib.h>
+#include <RBELib/USARTDebug.h>
+#include "prelab.h"
+
+void led()
+{
+	// initRBELib();
+	// debugUSARTInit(DEFAULT_BAUD);
+
+	setPinsDir('B', OUTPUT, 1, PORT0);	// Set B0 for output
+	setPinsDir('B', INPUT, 1, PORT1);	// Set B1 for input
+	//PINBbits._P1 = 1;
+	int ledStatus = 0;
+	while (1)
+	{
+		char buttonValue = getPinsVal('B', 1, PORT1);
+
+		if(buttonValue == 0b00000010)
+		{
+			ledStatus = ledStatus ^ ON; 		// If the button is pressed, toggle the value of the LED
+			setPinsVal('B', 1, 1, PORT0);		// turn port on
+			_delay_ms(500);
+		}
+
+	}
+}
+
+volatile unsigned long count = 0;
+ISR(TIMER0_OVF_vect)
+{
+	count++;
+}
+
+void blinkLed()
+{
+	setPinsDir('B', OUTPUT, 1, PORT0);	// Set B0 for output to the led.
+	initTimer(0, CTC, 256);
+
+	unsigned char ledState = 0;
+
+	while(1)
+	{
+		if(count % 100 == 0)
+		{
+			ledState = ledState ^ 1;
+			setPinsVal('B', ledState, 1, PORT0);
+		}
+	}
+}
+
+void readWriteSerial()
+{
+	debugUSARTInit(DEFAULT_BAUD);
+	unsigned char input = getCharDebug();
+	putCharDebug(input + 1);
+}
+
+int main(void)
+{
+	blinkLed();
+	led();
+	readWriteSerial();
+	return 0;
+}
