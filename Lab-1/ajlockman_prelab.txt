@@ -1,0 +1,94 @@
+#include "RBELib/RBELib.h" //RBELib
+#include "RBELib/USARTDebug.h"
+#include "RBELib/timer.h"
+
+/**
+ * This main method fulfills part 1 of the prelab, turning
+ * an LED on and off with a button press.
+ */
+int main(void)
+{
+	DDRBbits._P4 = OUTPUT; //Enable B.4 as output
+	DDRBbits._P5 = INPUT; //Enable B.5 as input
+	PORTBbits._P5 = ON; //Enable pull-up on B.5
+	while (1)
+	{
+		PINBbits._P4 = (PINBbits._P5) ? 0 : 1;
+		_delay_ms(1);
+	}
+	return 0;
+}
+
+/**
+ * This main method fulfills part 2 of the prelab,
+ * which prints a character to serial upon receiving
+ * a character from the computer.
+ */
+int main(void)
+{
+	initRBELib();
+	debugUSARTInit(DEFAULT_BAUD);
+	while (1)
+	{
+		putCharDebug(getCharDebug() + 1);
+		printf("Got a char.\n\r");
+	}
+	return 0;
+}
+
+unsigned char getCharDebug(void)
+{
+	while (!(UCSR1A & (1 << RXC1)))
+		;
+	return UDR1;
+}
+
+void putCharDebug(char byteToSend)
+{
+	while (!( UCSR1A & (1 << UDRE1)))
+		;
+	UDR1 = byteToSend;
+}
+
+void debugUSARTInit(unsigned long baudrate)
+{
+	UBRR1H = (F_CPU / (16 * baudrate) - 1) >> 8;
+	UBRR1L = (F_CPU / (16 * baudrate) - 1);
+	UCSR1B = (1 << RXEN1) | (1 << TXEN1);
+	UCSR1C = (1 << USBS1) | (3 << UCSZ10);
+}
+
+/**
+ * This main method fulfills part 3 of the prelab,
+ * which blinks an LED using a timer interrupt.
+ */
+int led_state = 0;
+ISR(TIMER0_COMPA_vect)
+{
+	led_state = !led_state;
+}
+
+int main(void)
+{
+	//TODO: Configure timer registers
+	DDRBbits._P4 = OUTPUT; //Enable B.4 as output
+	initTimer(0, CTC, 1000);
+	while(1)
+	{
+		PINBbits._P4 = led_state;
+	}
+}
+
+void initTimer(int timer, int mode, unsigned int comp)
+{
+	//TODO: Initialize timers.
+	switch(timer)
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	}
+}
