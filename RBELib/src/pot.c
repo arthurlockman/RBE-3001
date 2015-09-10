@@ -13,12 +13,12 @@ void initPot(potCalibration calib)
 	analogRange = calibration.DEG_180 - calibration.DEG_0;
 }
 
-int potAngle(int pot)
+int potAngle(long pot)
 {
 	return (int)(180.0 / analogRange * (pot - calibration.DEG_0));
 }
 
-int potVolts(int pot)
+int potVolts(long pot)
 {
 	return (pot / 1023.0) * 5000;
 }

@@ -20,6 +20,8 @@ typedef struct
 long analogRange;
 potCalibration calibration;
 
+const potCalibration DEFAULT_POT_CALIBRATION = {250, 625, 975};
+
 /**
  * Initalize the potentiometer and calculate the
  * line of best fit for the calibration data.
@@ -35,7 +37,7 @@ void initPot(potCalibration calib);
  *
  * @todo Calculate the angle using the ADC reading.
  */
-int potAngle(int pot);
+int potAngle(long pot);
 
 /** 
  * @brief Find the voltage value of the given potentiometer.
@@ -44,6 +46,6 @@ int potAngle(int pot);
  *
  * @todo Convert the ADC value into a voltage in mV (so no floats needed).
  */
-int potVolts(int pot);
+int potVolts(long pot);
 
 #endif /* PERIPH_H_ */
