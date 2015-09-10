@@ -10,6 +10,8 @@
 #ifndef POT_H_
 #define POT_H_
 
+#include "RBELib.h"
+
 typedef struct
 {
 	int DEG_0;
@@ -17,35 +19,38 @@ typedef struct
 	int DEG_180;
 } potCalibration;
 
-long analogRange;
-potCalibration calibration;
+typedef struct
+{
+	long min;
+	int adcChannel;
+	int scaler;
+} potentiometer;
 
-const potCalibration DEFAULT_POT_CALIBRATION = {250, 625, 975};
+potentiometer pots[2];
 
 /**
  * Initalize the potentiometer and calculate the
  * line of best fit for the calibration data.
  *
+ * @param pot The potentiometer to init and store.
+ * @param channel The ADC channel that the pot is connected to.
  * @param calib The calibration data.
  */
-void initPot(potCalibration calib);
+void initPot(int pot, int channel, potCalibration calib);
 
 /** 
  * @brief Find the angle of the given potentiometer.
  * @param  pot The pot to check.
+ * @param  calib The calibration for the potentiometer.
  * @return angle Angle of the potentiometer.
- *
- * @todo Calculate the angle using the ADC reading.
  */
-int potAngle(long pot);
+int potAngle(int pot);
 
 /** 
  * @brief Find the voltage value of the given potentiometer.
  * @param  pot The pot to get the value of.
  * @return volts Voltage of  potentiometer.
- *
- * @todo Convert the ADC value into a voltage in mV (so no floats needed).
  */
-int potVolts(long pot);
+int potVolts(int pot);
 
 #endif /* PERIPH_H_ */

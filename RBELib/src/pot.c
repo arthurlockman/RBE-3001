@@ -7,18 +7,21 @@
 
 #include "RBELib/pot.h"
 
-void initPot(potCalibration calib)
+void initPot(int pot, int channel, potCalibration calib)
 {
-	calibration = calib;
-	analogRange = calibration.DEG_180 - calibration.DEG_0;
+	pots[pot].adcChannel = channel;
+	pots[pot].min = calib.DEG_0;
+	pots[pot].scaler = (int)(180.0 / (calib.DEG_180 - calib.DEG_0));
 }
 
-int potAngle(long pot)
+int potAngle(int pot)
 {
-	return (int)(180.0 / analogRange * (pot - calibration.DEG_0));
+	long value = getADC(pots[pot].adcChannel);
+	return (int)(pots[pot].scaler * (value - pots[pot].min));
 }
 
-int potVolts(long pot)
+int potVolts(int pot)
 {
-	return (pot / 1023.0) * 5000;
+	long value = getADC(pots[pot].adcChannel);
+	return (value / 1023.0) * 5000;
 }
