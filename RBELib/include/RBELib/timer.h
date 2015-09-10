@@ -29,6 +29,11 @@
 
 #define CLK_IO 8000000
 
+/**
+ * Starts timer 0 running a 1ms timer whcih triggers the interrupt
+ * on overflow.
+ */
+void configureMsTimer();
 
 /**
  * @brief Initializes the specified timer in the specified mode. This

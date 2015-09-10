@@ -8,6 +8,14 @@
 #include <RBELib/RBELib.h>
 #include <RBELib/ADC.h>
 
+void configureMsTimer()
+{
+	sei();
+	TCCR0A = 0b00000000;
+	TCCR0B = 0b00000010;
+	TIMSK0 = 0b00000001;
+}
+
 void setTimerPeriod(int timer, double freq)
 {
 	int prescaler = 0;
