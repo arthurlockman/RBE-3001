@@ -10,6 +10,24 @@
 #ifndef POT_H_
 #define POT_H_
 
+typedef struct
+{
+	int DEG_0;
+	int DEG_90;
+	int DEG_180;
+} potCalibration;
+
+long analogRange;
+potCalibration calibration;
+
+/**
+ * Initalize the potentiometer and calculate the
+ * line of best fit for the calibration data.
+ *
+ * @param calib The calibration data.
+ */
+void initPot(potCalibration calib);
+
 /** 
  * @brief Find the angle of the given potentiometer.
  * @param  pot The pot to check.
