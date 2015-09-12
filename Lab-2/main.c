@@ -78,8 +78,11 @@ int main(void)
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
 	initSPI();
+	initADC(1, ADC_FREE_RUNNING, ADC_REF_VCC);
 	while (1)
 	{
-		driveLink(2, -2048);
+		driveLink(2, 4095);
+		printf("%d\n\r", readCurrentMilliamps(2));
+		_delay_ms(10);
 	}
 }
