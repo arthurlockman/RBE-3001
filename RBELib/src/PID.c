@@ -67,7 +67,7 @@ signed int calcPID(char link, int setPoint, int actPos)
 		kDiff = pidConsts.KDiffTerm_L;
 	}
 
-	Uk += Kp * (kDiff * er + kInt * erPrev + kDiff * erPrevPrev);
+	Uk += Kp * (kProp * er + kInt * erPrev + kDiff * erPrevPrev);
 
 	//store the values as previous values for next loop
 	if (link == 'H')
