@@ -21,7 +21,7 @@ typedef struct
 
 typedef struct
 {
-	long min;
+	int min;
 	int adcChannel;
 	double scaler;
 } potentiometer;

@@ -16,12 +16,12 @@ void initPot(int pot, int channel, potCalibration calib)
 
 int potAngle(int pot)
 {
-	long value = getADC(pots[pot].adcChannel);
+	int value = getADC(pots[pot].adcChannel);
 	return (int)(pots[pot].scaler * (value - pots[pot].min));
 }
 
 int potVolts(int pot)
 {
-	long value = getADC(pots[pot].adcChannel);
+	int value = getADC(pots[pot].adcChannel);
 	return (value / 1023.0) * 5000;
 }
