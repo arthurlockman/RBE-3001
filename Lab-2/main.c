@@ -13,7 +13,7 @@ ISR(TIMER0_OVF_vect)
 	}
 }
 
-int main(void)
+void armDataCapture()
 {
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
@@ -23,9 +23,13 @@ int main(void)
 
 	while (1)
 	{
-		printf("Angle: %d, mV: %d\n\r", potAngle(0), potVolts(0));
+		printf("%d, %d, %d\n\r", potAngle(0), potVolts(0), getADCValue());
 		_delay_ms(10);
 	}
+}
 
+int main(void)
+{
+	armDataCapture();
 	return 0;
 }
