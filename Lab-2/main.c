@@ -31,7 +31,6 @@ void armDataCapture()
 
 void outputTriangleWave()
 {
-	// armDataCapture();
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
 	initSPI();
@@ -76,5 +75,11 @@ void outputTriangleWave()
 
 int main(void)
 {
-	outputTriangleWave();
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
+	while (1)
+	{
+		driveLink(2, -2048);
+	}
 }
