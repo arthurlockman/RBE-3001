@@ -18,7 +18,8 @@ void armDataCapture()
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
 	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration cal = {250, 625, 975};
+	potCalibration cal =
+	{ 250, 625, 975 };
 	initPot(0, 3, cal);
 
 	while (1)
@@ -28,8 +29,52 @@ void armDataCapture()
 	}
 }
 
+void outputTriangleWave()
+{
+	// armDataCapture();
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
+	int dac_0_count = 0;
+	int dac_0_dir = 1;
+	int dac_1_count = 4095;
+	int dac_1_dir = 0;
+	while (1)
+	{
+		setDAC(0, dac_0_count);
+		setDAC(1, dac_1_count);
+		if (dac_0_dir == 1)
+			dac_0_count += 5;
+		else
+			dac_0_count -= 5;
+		if (dac_0_count >= 4095)
+		{
+			dac_0_count = 4095;
+			dac_0_dir = 0;
+		} else if (dac_0_count <= 0)
+		{
+			dac_0_count = 0;
+			dac_0_dir = 1;
+		}
+
+		if (dac_1_dir == 1)
+			dac_1_count += 5;
+		else
+			dac_1_count -= 5;
+		if (dac_1_count >= 4095)
+		{
+			dac_1_count = 4095;
+			dac_1_dir = 0;
+		} else if (dac_1_count <= 0)
+		{
+			dac_1_count = 0;
+			dac_1_dir = 1;
+		}
+	}
+}
+
+
 int main(void)
 {
-	armDataCapture();
-	return 0;
+	outputTriangleWave();
 }
