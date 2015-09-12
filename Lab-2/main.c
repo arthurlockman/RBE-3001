@@ -3,6 +3,9 @@
 
 long ms;
 short count;
+short pidCount;
+int upperLinkSetpoint, upperLinkActual;
+
 ISR(TIMER0_OVF_vect)
 {
 	count++;
@@ -10,6 +13,12 @@ ISR(TIMER0_OVF_vect)
 	{
 		ms++;
 		count = 1;
+		pidCount++;
+	}
+	if (pidCount == 9)
+	{
+		pidCount = 1;
+		calcPID('U', upperLinkSetpoint, upperLinkActual);
 	}
 }
 
@@ -72,8 +81,7 @@ void outputTriangleWave()
 	}
 }
 
-
-int main(void)
+void readCurrent()
 {
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
@@ -85,4 +93,56 @@ int main(void)
 		printf("%d\n\r", readCurrentMilliamps(2));
 		_delay_ms(10);
 	}
+}
+
+void tunePID()
+{
+	upperLinkSetpoint = 0;
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
+	initADC(1, ADC_FREE_RUNNING, ADC_REF_VCC);
+	potCalibration cal =
+	{ 250, 625, 975 };
+	initPot(0, 3, cal);
+	upperLinkActual = potAngle(0);
+	configureMsTimer();
+
+	int kPraw = getADC(7); //TODO: FIX THESE
+	int kIraw = getADC(8);
+	int kDraw = getADC(9);
+	float kP, kI, kD;
+	while (1)
+	{
+		char changed = 0;
+		if (getADC(7) != kPraw)
+		{
+			changed = 1;
+			kP = getADCValue(); //TODO: Scale values
+			kPraw = getADCValue();
+		}
+		if (getADC(7) != kIraw)
+		{
+			changed = 1;
+			kI = getADCValue();
+			kIraw = getADCValue();
+		}
+		if (getADC(7) != kDraw)
+		{
+			changed = 1;
+			kD = getADCValue();
+			kDraw = getADCValue();
+		}
+		if (changed)
+		{
+			setConst('U', kP, kI, kD);
+			printf("kP: %f, kI: %f, kD: %f\n\r", kP, kI, kD);
+		}
+	}
+	upperLinkActual = potAngle(0);
+}
+
+int main(void)
+{
+	tunePID();
 }
