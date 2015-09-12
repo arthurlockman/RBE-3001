@@ -6,7 +6,6 @@
  */
 
 #include "RBELib/RBELib.h"
-#include "SPI.h"
 
 void initSPI()
 {

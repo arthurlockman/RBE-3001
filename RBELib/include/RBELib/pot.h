@@ -23,7 +23,7 @@ typedef struct
 {
 	long min;
 	int adcChannel;
-	int scaler;
+	double scaler;
 } potentiometer;
 
 potentiometer pots[2];
