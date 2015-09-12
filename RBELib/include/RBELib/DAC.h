@@ -20,5 +20,4 @@
  */
 void setDAC(int DACn, int SPIVal);
 
-
 #endif
