@@ -41,7 +41,7 @@ void gotoXY(int x, int y);
  * @brief Drive a link (upper or lower) in a desired direction.
  *
  * @param link Which link to control.
- * @param dir Which way to drive the link.
+ * @param dir Signed int representing the direction and magnitude.
  *
  * @todo Create a way to drive either link in any direction.
  */
