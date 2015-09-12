@@ -46,12 +46,48 @@ typedef struct {
 } pidConst;
 
 /**
+ * @brief PID previous values.
+ * @details Obtain value using: @code pidConsts.Kp_H; @endcode
+ * for the value desired.
+ *
+ * Do not forget to use @code pidConst pidConsts; @endcode
+ * in any file you access them in!
+ */
+typedef struct {
+  /**
+   * @brief Upper link's previous PID value.
+   */
+  float Uk_H;
+  /**
+   * @brief Lower link's previous PID value.
+   */
+  float Uk_L;
+  /**
+  * @brief Higher link's previous error value.
+  */
+  int Er_H;
+  /**
+  * @brief Lower link's previous error value.
+  */
+  int Er_L;
+  /**
+  * @brief Higher link's previous error value.
+  */
+  int Er_H_prev;
+  /**
+  * @brief Lower link's previous error value.
+  */
+  int Er_L_prev;
+} pidPrev;
+
+/**
 * @brief Declaration for use in other files.
 *
 * @todo Again, do not forget to use @code pidConst pidConsts; @endcode
 * in any file you access them in!
 */
 extern pidConst pidConsts;
+extern pidPrev pidPrevs;
 
 /** 
  * @brief Sets the Kp, Ki, and Kd values for 1 link.
