@@ -90,8 +90,8 @@ typedef struct {
 /**
 * @brief Declaration for use in other files.
 */
-extern pidConst pidConsts;
-extern pidPrev pidPrevs;
+pidConst pidConsts;
+pidPrev pidPrevs;
 
 /** 
  * @brief Sets the Kp, Ki, and Kd values for 1 link.
