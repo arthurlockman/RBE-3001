@@ -56,4 +56,7 @@ void driveLink(int link, int dir);
  */
 void homePos();
 
+//@TODO: Comments
+int readCurrentMilliamps(int link);
+
 #endif /* MOTORS_H_ */
