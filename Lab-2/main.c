@@ -1,10 +1,11 @@
 #include "RBELib/RBELib.h"
 #include "RBELib/pot.h"
 
-long ms;
+unsigned long ms;
 short count;
 short pidCount;
-int upperLinkSetpoint, upperLinkActual;
+volatile int upperLinkSetpoint, upperLinkActual;
+volatile long pidOutput;
 
 ISR(TIMER0_OVF_vect)
 {
@@ -18,7 +19,7 @@ ISR(TIMER0_OVF_vect)
 	if (pidCount == 9)
 	{
 		pidCount = 1;
-		calcPID('U', upperLinkSetpoint, upperLinkActual);
+		pidOutput = calcPID('U', upperLinkSetpoint, upperLinkActual);
 	}
 }
 
@@ -97,49 +98,50 @@ void readCurrent()
 
 void tunePID()
 {
-	upperLinkSetpoint = 0;
+	upperLinkSetpoint = 90;
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
 	initSPI();
-	initADC(1, ADC_FREE_RUNNING, ADC_REF_VCC);
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
 	potCalibration cal =
 	{ 250, 625, 975 };
 	initPot(0, 3, cal);
 	upperLinkActual = potAngle(0);
 	configureMsTimer();
-
-	int kPraw = getADC(7); //TODO: FIX THESE
-	int kIraw = getADC(8);
-	int kDraw = getADC(9);
+	setPinsDir('D', INPUT, 1, PORT0);
+//	setPinsDir('B', INPUT, 4, PORT1, PORT2, PORT7, PORT4);
 	float kP, kI, kD;
+	unsigned long lastMs = ms;
 	while (1)
 	{
-		char changed = 0;
-		if (getADC(7) != kPraw)
+		if (ms - lastMs >= 100)
 		{
-			changed = 1;
-			kP = getADCValue(); //TODO: Scale values
-			kPraw = getADCValue();
+			kP = getADC(5); // 690
+			kI = getADC(6); // 3
+			kD = getADC(7); // 64
+			// printf("kP: %f, kI: %f, kD: %f, read: %d, out: %ld\n\r", kP, kI, kD, upperLinkActual, pidOutput);
+			// printf("%d\n\r", upperLinkActual);
+
+			// Calculate motor input voltage
+			float motorVoltageMv = pidOutput;
+			if (motorVoltageMv > 4095)
+				motorVoltageMv = 4095;
+			if (motorVoltageMv < -4095)
+				motorVoltageMv = -4095;
+			motorVoltageMv = motorVoltageMv * 8000.0 / 4096.0;
+
+			// Print statistics
+			printf("Command Pos: %d, Arm Pos: %d, Voltage (mV): %f, Current: %d\n\r", upperLinkSetpoint, upperLinkActual, motorVoltageMv, readCurrentMilliamps(2));
+			lastMs = ms;
 		}
-		if (getADC(7) != kIraw)
+		if (getPinsVal('D', 1, PORT0))
 		{
-			changed = 1;
-			kI = getADCValue();
-			kIraw = getADCValue();
-		}
-		if (getADC(7) != kDraw)
-		{
-			changed = 1;
-			kD = getADCValue();
-			kDraw = getADCValue();
-		}
-		if (changed)
-		{
+			printf("Setting pins val...\n\r");
 			setConst('U', kP, kI, kD);
-			printf("kP: %f, kI: %f, kD: %f\n\r", kP, kI, kD);
 		}
+		upperLinkActual = potAngle(0);
+		driveLink(2, pidOutput);
 	}
-	upperLinkActual = potAngle(0);
 }
 
 int main(void)
