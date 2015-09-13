@@ -19,8 +19,12 @@
 // void gotoXY(int x, int y);
 
 // TODO Implement different links
-void driveLink(int link, int dir)
+void driveLink(int link, long dir)
 {
+	if (dir > 4095)
+		dir = 4095;
+	if (dir < -4095)
+		dir = -4095;
 	switch(link)
 	{
 	case 1:

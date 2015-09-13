@@ -5,7 +5,7 @@
  *      Author: arthurlockman
  */
 
-#include "RBELib/pot.h"
+#include "RBELib/RBELib.h"
 
 void initPot(int pot, int channel, potCalibration calib)
 {

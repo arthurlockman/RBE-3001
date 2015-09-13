@@ -45,7 +45,7 @@ void gotoXY(int x, int y);
  *
  * @todo Create a way to drive either link in any direction.
  */
-void driveLink(int link, int dir);
+void driveLink(int link, long dir);
 
 /**
  * @brief Drive the arm to a "home" position using the potentiometers.  This

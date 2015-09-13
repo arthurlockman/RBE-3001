@@ -64,11 +64,11 @@ typedef struct {
   /**
    * @brief Upper link's previous PID value.
    */
-  float Uk_H;
+  long Uk_H;
   /**
    * @brief Lower link's previous PID value.
    */
-  float Uk_L;
+  long Uk_L;
   /**
   * @brief Higher link's previous error value.
   */
@@ -110,6 +110,6 @@ void setConst(char link, float Kp, float Ki, float Kd);
  * @param setPoint The desired position of the link.
  * @param actPos The current position of the link.
  */
-signed int calcPID(char link, int setPoint, int actPos);
+long calcPID(char link, int setPoint, int actPos);
 
 #endif /* PERIPH_H_ */

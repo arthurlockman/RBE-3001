@@ -10,10 +10,9 @@
 
 void setConst(char link, float Kp, float Ki, float Kd)
 {
-	float Td = Kp / Ki;
-	float Ti = Kp / Ki;
+	float Td = Kd / Kp;
 	float dT = 0.01;
-	float kPropTerm = (1.0 + (dT / Ti) + (Td / dT));
+	float kPropTerm = (1.0 + (dT * (Ki / Kp)) + (Td / dT));
 	float kIntTerm = (-1.0 - (2 * Td / dT));
 	float kDiffTerm = Td / dT;
 	if (link == 'L')
@@ -25,6 +24,9 @@ void setConst(char link, float Kp, float Ki, float Kd)
 		pidConsts.KPropTerm_L = kPropTerm;
 		pidConsts.KIntTerm_L = kIntTerm;
 		pidConsts.KDiffTerm_L = kDiffTerm;
+		pidPrevs.Uk_L = 0;
+		pidPrevs.Er_L_prev = 0;
+		pidPrevs.Er_L = 0;
 	} else if (link == 'U')
 	{
 		//set the higher link's PID constants
@@ -34,17 +36,21 @@ void setConst(char link, float Kp, float Ki, float Kd)
 		pidConsts.KPropTerm_H = kPropTerm;
 		pidConsts.KIntTerm_H = kIntTerm;
 		pidConsts.KDiffTerm_H = kDiffTerm;
+		pidPrevs.Uk_H = 0;
+		pidPrevs.Er_H_prev = 0;
+		pidPrevs.Er_H = 0;
 	}
 }
 
 
-signed int calcPID(char link, int setPoint, int actPos)
+long calcPID(char link, int setPoint, int actPos)
 {
 	int er = setPoint - actPos;
 
 	int erPrev;
 	int erPrevPrev;
-	float Uk, Kp, kProp, kInt, kDiff;
+	long Uk;
+	float Kp, kProp, kInt, kDiff;
 
 	// pull down relevant PID Symbols and previous values, calculate T values
 	if (link == 'U')
@@ -68,9 +74,12 @@ signed int calcPID(char link, int setPoint, int actPos)
 	}
 
 	Uk += Kp * (kProp * er + kInt * erPrev + kDiff * erPrevPrev);
+//	printf("er: %d, erPrev: %d, erPrevPrev: %d, ", er, erPrev, erPrevPrev);
+//	printf("kProp: %f, kInt: %f, kDiff: %f, ", kProp, kInt, kDiff);
+//	printf("actual: %d, set: %d, err: %d, Uk: %ld\n\r", actPos, setPoint, er, Uk);
 
 	//store the values as previous values for next loop
-	if (link == 'H')
+	if (link == 'U')
 	{
 		pidPrevs.Er_H_prev = pidPrevs.Er_H;
 		pidPrevs.Er_H = er;
