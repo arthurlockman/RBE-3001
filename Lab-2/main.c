@@ -96,53 +96,53 @@ void readCurrent()
 	}
 }
 
-void tunePID()
-{
-	upperLinkSetpoint = 90;
-	debugUSARTInit(DEFAULT_BAUD);
-	initRBELib();
-	initSPI();
-	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration cal =
-	{ 250, 625, 975 };
-	initPot(0, 3, cal);
-	upperLinkActual = potAngle(0);
-	configureMsTimer();
-	setPinsDir('D', INPUT, 1, PORT0);
-//	setPinsDir('B', INPUT, 4, PORT1, PORT2, PORT7, PORT4);
-	float kP, kI, kD;
-	unsigned long lastMs = ms;
-	while (1)
-	{
-		if (ms - lastMs >= 100)
-		{
-			kP = getADC(5); // 690
-			kI = getADC(6); // 3
-			kD = getADC(7); // 64
-			// printf("kP: %f, kI: %f, kD: %f, read: %d, out: %ld\n\r", kP, kI, kD, upperLinkActual, pidOutput);
-			// printf("%d\n\r", upperLinkActual);
-
-			// Calculate motor input voltage
-			float motorVoltageMv = pidOutput;
-			if (motorVoltageMv > 4095)
-				motorVoltageMv = 4095;
-			if (motorVoltageMv < -4095)
-				motorVoltageMv = -4095;
-			motorVoltageMv = motorVoltageMv * 8000.0 / 4096.0;
-
-			// Print statistics
-			printf("Command Pos: %d, Arm Pos: %d, Voltage (mV): %f, Current: %d\n\r", upperLinkSetpoint, upperLinkActual, motorVoltageMv, readCurrentMilliamps(2));
-			lastMs = ms;
-		}
-		if (getPinsVal('D', 1, PORT0))
-		{
-			printf("Setting pins val...\n\r");
-			setConst('U', kP, kI, kD);
-		}
-		upperLinkActual = potAngle(0);
-		driveLink(2, pidOutput);
-	}
-}
+//void tunePID()
+//{
+//	upperLinkSetpoint = 90;
+//	debugUSARTInit(DEFAULT_BAUD);
+//	initRBELib();
+//	initSPI();
+//	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+//	potCalibration cal =
+//	{ 250, 625, 975 };
+//	initPot(0, 3, cal);
+//	upperLinkActual = potAngle(0);
+//	configureMsTimer();
+//	setPinsDir('D', INPUT, 1, PORT0);
+////	setPinsDir('B', INPUT, 4, PORT1, PORT2, PORT7, PORT4);
+//	float kP, kI, kD;
+//	unsigned long lastMs = ms;
+//	while (1)
+//	{
+//		if (ms - lastMs >= 100)
+//		{
+//			kP = getADC(5); // 690
+//			kI = getADC(6); // 3
+//			kD = getADC(7); // 64
+//			// printf("kP: %f, kI: %f, kD: %f, read: %d, out: %ld\n\r", kP, kI, kD, upperLinkActual, pidOutput);
+//			// printf("%d\n\r", upperLinkActual);
+//
+//			// Calculate motor input voltage
+//			float motorVoltageMv = pidOutput;
+//			if (motorVoltageMv > 4095)
+//				motorVoltageMv = 4095;
+//			if (motorVoltageMv < -4095)
+//				motorVoltageMv = -4095;
+//			motorVoltageMv = motorVoltageMv * 8000.0 / 4096.0;
+//
+//			// Print statistics
+//			printf("Command Pos: %d, Arm Pos: %d, Voltage (mV): %f, Current: %d\n\r", upperLinkSetpoint, upperLinkActual, motorVoltageMv, readCurrentMilliamps(2));
+//			lastMs = ms;
+//		}
+//		if (getPinsVal('D', 1, PORT0))
+//		{
+//			printf("Setting pins val...\n\r");
+//			setConst('U', kP, kI, kD);
+//		}
+//		upperLinkActual = potAngle(0);
+//		driveLink(2, pidOutput);
+//	}
+//}
 
 void pidButtons()
 {
@@ -160,24 +160,25 @@ void pidButtons()
 	setConst('U', 690.0, 3.0, 64.0); //set PID gains
 	while (1)
 	{
-		switch (getPinsVal('A', 4, PORT4, PORT5, PORT6, PORT7))
+		if (getPinsVal('A', 1, PORT4))
 		{
-		case 0b0001000:
 			printf("Changing setpoint to 0...\n\r");
 			upperLinkSetpoint = 0;
-			break;
-		case 0b0010000:
+		}
+		else if (getPinsVal('A', 1, PORT5))
+		{
 			printf("Changing setpoint to 30...\n\r");
 			upperLinkSetpoint = 30;
-			break;
-		case 0b0100000:
+		}
+		else if (getPinsVal('A', 1, PORT6))
+		{
 			printf("Changing setpoint to 60...\n\r");
 			upperLinkSetpoint = 60;
-			break;
-		case 0b1000000:
+		}
+		else if (getPinsVal('A', 1, PORT7))
+		{
 			printf("Changing setpoint to 90...\n\r");
 			upperLinkSetpoint = 90;
-			break;
 		}
 		driveLink(2, pidOutput);
 		upperLinkActual = potAngle(0);
@@ -186,5 +187,5 @@ void pidButtons()
 
 int main(void)
 {
-	tunePID();
+	pidButtons();
 }
