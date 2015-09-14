@@ -144,6 +144,46 @@ void tunePID()
 	}
 }
 
+void pidButtons()
+{
+	upperLinkSetpoint = 90;
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+	potCalibration cal =
+	{ 250, 625, 975 };
+	initPot(0, 3, cal);
+	upperLinkActual = potAngle(0);
+	configureMsTimer();
+	setPinsDir('A', INPUT, 4, PORT4, PORT5, PORT6, PORT7); //not using ADC channels other than 0 and 1, configure with those
+	setConst('U', 690.0, 3.0, 64.0); //set PID gains
+	while (1)
+	{
+		switch (getPinsVal('A', 4, PORT4, PORT5, PORT6, PORT7))
+		{
+		case 0b0001000:
+			printf("Changing setpoint to 0...\n\r");
+			upperLinkSetpoint = 0;
+			break;
+		case 0b0010000:
+			printf("Changing setpoint to 30...\n\r");
+			upperLinkSetpoint = 30;
+			break;
+		case 0b0100000:
+			printf("Changing setpoint to 60...\n\r");
+			upperLinkSetpoint = 60;
+			break;
+		case 0b1000000:
+			printf("Changing setpoint to 90...\n\r");
+			upperLinkSetpoint = 90;
+			break;
+		}
+		driveLink(2, pidOutput);
+		upperLinkActual = potAngle(0);
+	}
+}
+
 int main(void)
 {
 	tunePID();
