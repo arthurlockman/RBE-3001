@@ -60,7 +60,8 @@ void outputTriangleWave()
 		{
 			dac_0_count = 4095;
 			dac_0_dir = 0;
-		} else if (dac_0_count <= 0)
+		}
+		else if (dac_0_count <= 0)
 		{
 			dac_0_count = 0;
 			dac_0_dir = 1;
@@ -74,7 +75,8 @@ void outputTriangleWave()
 		{
 			dac_1_count = 4095;
 			dac_1_dir = 0;
-		} else if (dac_1_count <= 0)
+		}
+		else if (dac_1_count <= 0)
 		{
 			dac_1_count = 0;
 			dac_1_dir = 1;
@@ -157,31 +159,43 @@ void pidButtons()
 	upperLinkActual = potAngle(0);
 	configureMsTimer();
 	setPinsDir('A', INPUT, 4, PORT4, PORT5, PORT6, PORT7); //not using ADC channels other than 0 and 1, configure with those
-	setConst('U', 690.0, 3.0, 64.0); //set PID gains
+	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
+	unsigned long lastMs;
 	while (1)
 	{
 		if (getPinsVal('A', 1, PORT4))
 		{
-			printf("Changing setpoint to 0...\n\r");
 			upperLinkSetpoint = 0;
 		}
 		else if (getPinsVal('A', 1, PORT5))
 		{
-			printf("Changing setpoint to 30...\n\r");
 			upperLinkSetpoint = 30;
 		}
 		else if (getPinsVal('A', 1, PORT6))
 		{
-			printf("Changing setpoint to 60...\n\r");
 			upperLinkSetpoint = 60;
 		}
 		else if (getPinsVal('A', 1, PORT7))
 		{
-			printf("Changing setpoint to 90...\n\r");
 			upperLinkSetpoint = 90;
 		}
 		driveLink(2, pidOutput);
 		upperLinkActual = potAngle(0);
+
+		if (ms - lastMs >= 10)
+		{
+			// Calculate motor input voltage
+			float motorVoltageMv = pidOutput;
+			if (motorVoltageMv > 4095)
+				motorVoltageMv = 4095;
+			if (motorVoltageMv < -4095)
+				motorVoltageMv = -4095;
+			motorVoltageMv = motorVoltageMv * 8000.0 / 4096.0;
+
+			printf("%d, %d, %f, %d\n\r", upperLinkSetpoint, upperLinkActual, motorVoltageMv, readCurrentMilliamps(2));
+			lastMs = ms;
+		}
+
 	}
 }
 
