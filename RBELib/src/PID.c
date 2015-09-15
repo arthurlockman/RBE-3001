@@ -46,6 +46,10 @@ void setConst(char link, float Kp, float Ki, float Kd)
 long calcPID(char link, int setPoint, int actPos)
 {
 	int er = setPoint - actPos;
+	if(er <= 1 && er >= -1)
+	{
+		return 0;
+	}
 
 	int erPrev;
 	int erPrevPrev;
