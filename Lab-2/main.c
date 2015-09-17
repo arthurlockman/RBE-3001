@@ -1,5 +1,8 @@
 #include "RBELib/RBELib.h"
 #include "RBELib/pot.h"
+#include <math.h>
+
+#define degToRadConstant = 0.01745329251
 
 unsigned long ms;
 short count;
@@ -260,7 +263,40 @@ void pidButtons2()
 	}
 }
 
+int* calcXY()
+{
+	float a1 = 152.4;
+	float a2 = 111.76;
+
+	int x, y;
+
+	gotoAngles(0, 0);
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+	potCalibration calUpper =
+	{ 250, 625, 975 };
+	initPot(0, 3, calUpper);
+	potCalibration calLower =
+	{ 255, 668, 1100 };
+	initPot(1, 2, calLower);
+	configureMsTimer();
+
+	while(1)
+	{
+		upperLinkActual = potAngle(0) - 90;
+		lowerLinkActual = potAngle(1) - 90;
+
+		y = (int)(137.16 + cos(lowerLinkActual) * a1 + cos(upperLinkActual + lowerLinkActual)*a2);
+		x = (int)(sin(lowerLinkActual) * a1 + sin(upperLinkActual + lowerLinkActual)*a2);
+		printf("%d, %d, %d, %d\n\r", upperLinkActual, lowerLinkActual, x, y);
+	}
+
+}
+
 int main(void)
 {
-	 pidButtons2();
+	 // pidButtons2();
+	calcXY();
 }
