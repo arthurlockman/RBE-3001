@@ -93,6 +93,9 @@ typedef struct {
 pidConst pidConsts;
 pidPrev pidPrevs;
 
+int upperLinkSetpoint;
+int lowerLinkSetpoint;
+
 /** 
  * @brief Sets the Kp, Ki, and Kd values for 1 link.
  * @details to set the values, use the following style
@@ -110,6 +113,8 @@ void setConst(char link, float Kp, float Ki, float Kd);
  * @param setPoint The desired position of the link.
  * @param actPos The current position of the link.
  */
-long calcPID(char link, int setPoint, int actPos);
+long calcPID(char link, int actPos);
+
+void setSetpoint(char link, int setPoint);
 
 #endif /* PERIPH_H_ */

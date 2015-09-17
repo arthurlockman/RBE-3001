@@ -43,8 +43,11 @@ void setConst(char link, float Kp, float Ki, float Kd)
 }
 
 
-long calcPID(char link, int setPoint, int actPos)
+long calcPID(char link, int actPos)
 {
+	int setPoint;
+	if (link == 'U') setPoint = upperLinkSetpoint;
+	else if (link == 'L') setPoint = lowerLinkSetpoint;
 	int er = setPoint - actPos;
 	if(er <= 1 && er >= -1)
 	{
@@ -96,4 +99,10 @@ long calcPID(char link, int setPoint, int actPos)
 	}
 
 	return Uk;
+}
+
+void setSetpoint(char link, int setPoint)
+{
+	if (link == 'U') upperLinkSetpoint = setPoint;
+	else if (link == 'L') lowerLinkSetpoint = setPoint;
 }

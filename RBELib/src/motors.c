@@ -14,7 +14,11 @@
 	 driveLink(2, 0);
  }
 
-// void gotoAngles(int lowerTheta, int upperTheta);
+void gotoAngles(int lowerTheta, int upperTheta)
+{
+	setSetpoint('U', upperTheta + 90);
+	setSetpoint('L', lowerTheta + 90);
+}
 
 // void gotoXY(int x, int y);
 
@@ -30,12 +34,12 @@ void driveLink(int link, long dir)
 	case 1:
 		if (dir >= 0)
 		{
-			setDAC(1, dir);
-			setDAC(0, 0);
+			setDAC(0, dir);
+			setDAC(1, 0);
 		} else
 		{
-			setDAC(1, 0);
-			setDAC(0, -dir);
+			setDAC(0, 0);
+			setDAC(1, -dir);
 		}
 		break;
 	case 2:
