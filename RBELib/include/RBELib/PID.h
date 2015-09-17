@@ -117,4 +117,6 @@ long calcPID(char link, int actPos);
 
 void setSetpoint(char link, int setPoint);
 
+int getSetpoint(char link);
+
 #endif /* PERIPH_H_ */

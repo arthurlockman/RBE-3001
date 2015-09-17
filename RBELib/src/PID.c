@@ -106,3 +106,10 @@ void setSetpoint(char link, int setPoint)
 	if (link == 'U') upperLinkSetpoint = setPoint;
 	else if (link == 'L') lowerLinkSetpoint = setPoint;
 }
+
+int getSetpoint(char link)
+{
+	if (link == 'U') return upperLinkSetpoint;
+	else if (link == 'L') return lowerLinkSetpoint;
+	return 0;
+}

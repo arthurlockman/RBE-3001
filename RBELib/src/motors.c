@@ -30,7 +30,19 @@ void gotoXY(int x, int y)
 	float t2neg = atan2(-x1, x2);
 	float t1pos = atan2(link2 * sin(t2pos), link1 + link2 * cos(t2pos));
 	float t1neg = atan2(link2 * sin(t2neg), link1 + link2 * cos(t2neg));
-	if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+	if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90) && IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+	{
+		//TODO: Decide which to go to if both are valid
+		int dt1pos, dt2pos, dt1neg, dt2neg;
+		dt1pos = abs(getSetpoint('L') - t1pos);
+		dt2pos = abs(getSetpoint('U') - t2pos);
+		dt1neg = abs(getSetpoint('L') - t1neg);
+		dt2neg = abs(getSetpoint('U') - t2neg);
+		if (dt1pos + dt2pos <= dt1neg + dt2neg)
+			gotoAngles(t1pos, t2pos);
+		else
+			gotoAngles(t1neg, t2neg);
+	} else if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
 	{
 		gotoAngles(t1pos, t2pos);
 	} else if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
