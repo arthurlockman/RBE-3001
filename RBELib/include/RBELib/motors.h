@@ -10,6 +10,8 @@
 #ifndef MOTORS_H_
 #define MOTORS_H_
 
+#define IN_RANGE(val, upper, lower) (val >= lower && val <= upper)
+
 /**
  * @brief Helper function to stop the motors on the arm.
  *

@@ -20,7 +20,24 @@ void gotoAngles(int lowerTheta, int upperTheta)
 	setSetpoint('L', lowerTheta + 90);
 }
 
-// void gotoXY(int x, int y);
+void gotoXY(int x, int y)
+{
+	float link1 = 6.0;
+	float link2 = 9.0; //TODO: Update link lengths
+	float x1 = sqrt(1 - (pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2));
+	float x2 = (pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2);
+	float t2pos = atan2(x1, x2);
+	float t2neg = atan2(-x1, x2);
+	float t1pos = atan2(link2 * sin(t2pos), link1 + link2 * cos(t2pos));
+	float t1neg = atan2(link2 * sin(t2neg), link1 + link2 * cos(t2neg));
+	if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+	{
+		gotoAngles(t1pos, t2pos);
+	} else if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+	{
+		gotoAngles(t1neg, t2neg);
+	}
+}
 
 // TODO Implement different links
 void driveLink(int link, long dir)
