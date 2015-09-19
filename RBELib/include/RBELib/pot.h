@@ -45,6 +45,7 @@ void initPot(int pot, int channel, potCalibration calib);
  * @return angle Angle of the potentiometer.
  */
 int potAngle(int pot);
+float potAngleFloat(int pot);
 
 /** 
  * @brief Find the voltage value of the given potentiometer.

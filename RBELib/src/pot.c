@@ -20,6 +20,12 @@ int potAngle(int pot)
 	return (int)(pots[pot].scaler * (value - pots[pot].min));
 }
 
+float potAngleFloat(int pot)
+{
+	int value = getADC(pots[pot].adcChannel);
+	return pots[pot].scaler * (value - pots[pot].min);
+}
+
 int potVolts(int pot)
 {
 	int value = getADC(pots[pot].adcChannel);
