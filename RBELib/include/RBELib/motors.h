@@ -12,6 +12,7 @@
 
 #define IN_RANGE(val, upper, lower) (val >= lower && val <= upper)
 #define abs(val) ((val < 0) ? -val : val)
+
 /**
  * @brief Helper function to stop the motors on the arm.
  *

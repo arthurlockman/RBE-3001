@@ -7,6 +7,8 @@
 
 #include "RBELib/RBELib.h"
 
+const float k_degToRad = 0.01745329251;
+const float k_radToDeg = 57.2957795;
 
  void stopMotors()
  {
@@ -18,37 +20,82 @@ void gotoAngles(int lowerTheta, int upperTheta)
 {
 	setSetpoint('U', upperTheta + 90);
 	setSetpoint('L', lowerTheta + 90);
+	// printf("Lower: %d, Upper: %d\n\r", lowerTheta, upperTheta);
 }
 
 void gotoXY(int x, int y)
 {
-	float link1 = 6.0;
-	float link2 = 9.0; //TODO: Update link lengths
-	float x1 = sqrt(1 - (pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2));
+	float link1 = 152.4; // mm
+	float link2 = 111.76; // mm
+	float x1 = sqrt(1 - pow((pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2), 2));
 	float x2 = (pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2);
 	float t2pos = atan2(x1, x2);
 	float t2neg = atan2(-x1, x2);
-	float t1pos = atan2(link2 * sin(t2pos), link1 + link2 * cos(t2pos));
-	float t1neg = atan2(link2 * sin(t2neg), link1 + link2 * cos(t2neg));
-	if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90) && IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+	float t1pos = atan2((float)y, (float)x) - atan2(link2 * sin(t2pos), link1 + link2 * cos(t2pos));
+	float t1neg = atan2((float)y, (float)x) - atan2(link2 * sin(t2neg), link1 + link2 * cos(t2neg));
+
+	// MOTHER FUCKING RADIANS. CONVERTING TO DEGREES.
+	float theta1pos = t1pos * k_radToDeg;
+	float theta2pos = t2pos * k_radToDeg;
+	float theta1neg = t1neg * k_radToDeg;
+	float theta2neg = t2neg * k_radToDeg;
+	printf("T1+: %f, T2+: %f, T1-:%f, T2-:%f, ", theta1pos, theta2pos, theta1neg, theta2neg);
+
+	// At the point, we must determine which of the 4 angles are valid.
+	// Once we determine which of them are valid, we must contruct pairs of angles.
+	// Once we have the pairs of angles, we must determine if the pairs of angles are valid.
+	// If at this point we have 2 valid pairs of angles, we must determine which pair to choose.
+
+	if (IN_RANGE(theta1pos, 90, -90) && IN_RANGE(theta2pos, 90, -90) && IN_RANGE(theta1neg, 90, -90) && IN_RANGE(theta2neg, 90, -90))
 	{
 		//TODO: Decide which to go to if both are valid
 		int dt1pos, dt2pos, dt1neg, dt2neg;
-		dt1pos = abs(getSetpoint('L') - t1pos);
-		dt2pos = abs(getSetpoint('U') - t2pos);
-		dt1neg = abs(getSetpoint('L') - t1neg);
-		dt2neg = abs(getSetpoint('U') - t2neg);
-		if (dt1pos + dt2pos <= dt1neg + dt2neg)
-			gotoAngles(t1pos, t2pos);
+		dt1pos = abs(getSetpoint('L') - theta1pos);
+		dt2pos = abs(getSetpoint('U') - theta2pos);
+		dt1neg = abs(getSetpoint('L') - theta1neg);
+		dt2neg = abs(getSetpoint('U') - theta2neg);
+
+		if(dt1pos <= dt1neg)
+		{
+			if(dt2pos <= dt2neg)
+			{
+				printf("1, ");
+				gotoAngles(theta1pos, theta2pos);
+			}
+			else
+			{
+				printf("2, ");
+				gotoAngles(theta1pos, theta2neg);
+			}
+		}
 		else
-			gotoAngles(t1neg, t2neg);
-	} else if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+		{
+			if(dt2pos <= dt2neg)
+			{
+				printf("3, ");
+				gotoAngles(theta1neg, theta2pos);
+			}
+			else
+			{
+				printf("4, ");
+				gotoAngles(theta1neg, theta2neg);
+			}
+		}
+	} else if (IN_RANGE(theta1pos, 90, -90) && IN_RANGE(theta2pos, 90, -90))
 	{
-		gotoAngles(t1pos, t2pos);
-	} else if (IN_RANGE(t1pos, 90, -90) && IN_RANGE(t2pos, 90, -90))
+		printf("5, ");
+		gotoAngles(theta1pos, theta2pos);
+	} else if (IN_RANGE(theta1neg, 90, -90) && IN_RANGE(theta2neg, 90, -90))
 	{
-		gotoAngles(t1neg, t2neg);
+		printf("6, ");
+		gotoAngles(theta1neg, theta2neg);
 	}
+	else
+	{
+		// printf("Not in range. \n\r");
+	}
+
+
 }
 
 // TODO Implement different links

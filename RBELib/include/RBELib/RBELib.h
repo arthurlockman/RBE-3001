@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <math.h>
 
 //Macros for I/O
 #define OUTPUT	1
