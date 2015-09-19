@@ -1,12 +1,11 @@
 #include "RBELib/RBELib.h"
-#include "RBELib/pot.h"
 
 unsigned long ms;
 short count;
 short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
-float degToRadConstant = 0.01745329251;
+
 
 ISR(TIMER0_OVF_vect)
 {
@@ -276,11 +275,11 @@ void calcXY(int* pos)
 	{ 255, 668, 1100 };
 	initPot(1, 2, calLower);
 
-	float lowerLinkActualRad = (potAngleFloat(1) - 90.0) * degToRadConstant;
-	float upperLinkActualRad = (potAngleFloat(0) - 90.0) * degToRadConstant;
+	float lowerLinkActualRad = (potAngleFloat(1) - 90.0) * 0.01745329251; // degToRad constant
+	float upperLinkActualRad = (potAngleFloat(0) - 90.0) * 0.01745329251;
 
-	y = (137.16 + cos(lowerLinkActualRad) * a1 + cos(upperLinkActualRad + lowerLinkActualRad) * a2);
-	x = -1*(sin(lowerLinkActualRad) * a1 + sin(upperLinkActualRad + lowerLinkActualRad) * a2);
+	x = (cos(lowerLinkActualRad) * a1 + cos(upperLinkActualRad + lowerLinkActualRad) * a2);
+	y = (sin(lowerLinkActualRad) * a1 + sin(upperLinkActualRad + lowerLinkActualRad) * a2);
 	// printf("%f, %f, %f, %f\n\r", potAngleFloat(1) - 90.0, potAngleFloat(0) - 90.0, x, y);
 
 	pos[0] = (int)x;
@@ -348,16 +347,49 @@ void calcXY(int* pos)
 //	}
 //}
 
+void testGotoXY()
+{
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+	potCalibration calUpper =
+	{ 250, 625, 975 };
+	initPot(0, 3, calUpper);
+	potCalibration calLower =
+	{ 255, 668, 1100 };
+	initPot(1, 2, calLower);
+	configureMsTimer();
+	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
+	setConst('L', 700.0, 6.0, 63.0);
+
+	while(1)
+	{
+		upperLinkActual = potAngle(0);
+		lowerLinkActual = potAngle(1);
+		// Two pots to control the XY position
+		int x = (int)(getADC(4)*264.0/1024.0);
+		int y = -(int)(getADC(5)*264.0/1024.0);
+
+		gotoXY(x, y);
+		driveLink(2, pidOutputUpper);
+		driveLink(1, pidOutputLower);
+		// int pos[2];
+		// calcXY(pos);
+		//printf("%d, %d\n\r", pidOutputUpper, pidOutputLower);
+		printf("X: %d, Y: %d\n\r", x, y);
+	}
+}
+
 int main(void)
 {
 	debugUSARTInit(DEFAULT_BAUD);
 	initRBELib();
 	initSPI();
-	// pidButtons2();
-	while(1)
-	{
-		int pos[2];
-		calcXY(pos);
-		printf("%d, %d\n\r", pos[0], pos[1]);
-	}
+//	// pidButtons2();
+//	while(1)
+//	{
+//		int pos[2];
+//		calcXY(pos);
+//		printf("%d, %d\n\r", pos[0], pos[1]);
+//	}
+	testGotoXY();
+
 }
