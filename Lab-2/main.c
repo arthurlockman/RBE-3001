@@ -1,14 +1,12 @@
 #include "RBELib/RBELib.h"
 #include "RBELib/pot.h"
-#include <math.h>
-
-#define degToRadConstant = 0.01745329251
 
 unsigned long ms;
 short count;
 short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
+float degToRadConstant = 0.01745329251;
 
 ISR(TIMER0_OVF_vect)
 {
@@ -263,17 +261,13 @@ void pidButtons2()
 	}
 }
 
-int* calcXY()
+void calcXY(int* pos)
 {
-	float a1 = 152.4;
-	float a2 = 111.76;
+	float a1 = 152.4; // in mm
+	float a2 = 111.76; // in mm
 
-	int x, y;
+	float x, y;
 
-	gotoAngles(0, 0);
-	debugUSARTInit(DEFAULT_BAUD);
-	initRBELib();
-	initSPI();
 	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
 	potCalibration calUpper =
 	{ 250, 625, 975 };
@@ -281,84 +275,89 @@ int* calcXY()
 	potCalibration calLower =
 	{ 255, 668, 1100 };
 	initPot(1, 2, calLower);
-	configureMsTimer();
 
-	while (1)
-	{
-		upperLinkActual = potAngle(0) - 90;
-		lowerLinkActual = potAngle(1) - 90;
+	float lowerLinkActualRad = (potAngleFloat(1) - 90.0) * degToRadConstant;
+	float upperLinkActualRad = (potAngleFloat(0) - 90.0) * degToRadConstant;
 
-		y = (int) (137.16 + cos(lowerLinkActual) * a1
-				+ cos(upperLinkActual + lowerLinkActual) * a2);
-		x = (int) (sin(lowerLinkActual) * a1
-				+ sin(upperLinkActual + lowerLinkActual) * a2);
-		printf("%d, %d, %d, %d\n\r", upperLinkActual, lowerLinkActual, x, y);
-	}
+	y = (137.16 + cos(lowerLinkActualRad) * a1 + cos(upperLinkActualRad + lowerLinkActualRad) * a2);
+	x = -1*(sin(lowerLinkActualRad) * a1 + sin(upperLinkActualRad + lowerLinkActualRad) * a2);
+	// printf("%f, %f, %f, %f\n\r", potAngleFloat(1) - 90.0, potAngleFloat(0) - 90.0, x, y);
+
+	pos[0] = (int)x;
+	pos[1] = (int)y;
 
 }
 
-void drawTriangle()
-{
-	debugUSARTInit(DEFAULT_BAUD);
-	initRBELib();
-	initSPI();
-	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration calUpper =
-	{ 250, 625, 975 };
-	initPot(0, 3, calUpper);
-	potCalibration calLower =
-	{ 255, 668, 1100 };
-	initPot(1, 2, calLower);
-	upperLinkActual = potAngle(0);
-	lowerLinkActual = potAngle(1);
-	configureMsTimer();
-	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
-	setConst('L', 700.0, 6.0, 63.0);
-	int posX = 100;
-	int posY = 100;
-	gotoXY(posX, posY);
-	int side = 1;
-	int count = 0;
-	int lastMs = ms;
-	while (1)
-	{
-		gotoXY(posX, posY);
-		driveLink(2, pidOutputUpper);
-		driveLink(1, pidOutputLower);
-		upperLinkActual = potAngle(0);
-		lowerLinkActual = potAngle(1);
-
-		if (ms - lastMs >= 100)
-		{
-			if (count == 100) //100mm, side length
-			{
-				count = 0;
-				side++;
-				if (side > 3)
-					side = 1;
-			}
-			switch (side)
-			{
-			case 1:
-				posX++;
-				break;
-			case 2:
-				posY++;
-				posX--;
-				break;
-			case 3:
-				posY--;
-				posX--;
-				break;
-			}
-			count++;
-			lastMs = ms;
-		}
-	}
-}
+//void drawTriangle()
+//{
+//	debugUSARTInit(DEFAULT_BAUD);
+//	initRBELib();
+//	initSPI();
+//	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+//	potCalibration calUpper =
+//	{ 250, 625, 975 };
+//	initPot(0, 3, calUpper);
+//	potCalibration calLower =
+//	{ 255, 668, 1100 };
+//	initPot(1, 2, calLower);
+//	upperLinkActual = potAngle(0);
+//	lowerLinkActual = potAngle(1);
+//	configureMsTimer();
+//	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
+//	setConst('L', 700.0, 6.0, 63.0);
+//	int posX = 100;
+//	int posY = 100;
+//	gotoXY(posX, posY);
+//	int side = 1;
+//	int count = 0;
+//	int lastMs = ms;
+//	while (1)
+//	{
+//		gotoXY(posX, posY);
+//		driveLink(2, pidOutputUpper);
+//		driveLink(1, pidOutputLower);
+//		upperLinkActual = potAngle(0);
+//		lowerLinkActual = potAngle(1);
+//
+//		if (ms - lastMs >= 100)
+//		{
+//			if (count == 100) //100mm, side length
+//			{
+//				count = 0;
+//				side++;
+//				if (side > 3)
+//					side = 1;
+//			}
+//			switch (side)
+//			{
+//			case 1:
+//				posX++;
+//				break;
+//			case 2:
+//				posY++;
+//				posX--;
+//				break;
+//			case 3:
+//				posY--;
+//				posX--;
+//				break;
+//			}
+//			count++;
+//			lastMs = ms;
+//		}
+//	}
+//}
 
 int main(void)
 {
+	debugUSARTInit(DEFAULT_BAUD);
+	initRBELib();
+	initSPI();
 	// pidButtons2();
-	calcXY();
+	while(1)
+	{
+		int pos[2];
+		calcXY(pos);
+		printf("%d, %d\n\r", pos[0], pos[1]);
+	}
 }
