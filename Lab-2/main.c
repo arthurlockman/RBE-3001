@@ -357,16 +357,20 @@ void testGotoXY()
 	{ 255, 668, 1100 };
 	initPot(1, 2, calLower);
 	configureMsTimer();
-	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
-	setConst('L', 700.0, 6.0, 63.0);
+	setConst('U', 300.0, 0.0, 10.0); //set PID gains 690.0, 3.0, 64.0
+	setConst('L', 300.0, 0.0, 10.0);
 
+	int state = 0;
+	int x = 260;
+	int y = 0;
+	long lastms = ms;
 	while(1)
 	{
 		upperLinkActual = potAngle(0);
 		lowerLinkActual = potAngle(1);
 		// Two pots to control the XY position
-		int x = (int)(getADC(4)*264.0/1024.0);
-		int y = -(int)(getADC(5)*264.0/1024.0);
+//		int x = (int)(getADC(4)*264.0/1024.0);
+//		int y = -(int)(getADC(5)*264.0/1024.0);
 
 		gotoXY(x, y);
 		driveLink(2, pidOutputUpper);
@@ -375,6 +379,31 @@ void testGotoXY()
 		// calcXY(pos);
 		//printf("%d, %d\n\r", pidOutputUpper, pidOutputLower);
 		printf("X: %d, Y: %d\n\r", x, y);
+		if (ms - lastms > 20)
+		{
+			lastms = ms;
+			switch (state)
+			{
+			case 0:
+				x-= 1;
+				y = 0;
+				if (x <= 200)
+					state++;
+				break;
+			case 1:
+				x = 200;
+				y -= 1;
+				if (y <= -60)
+					state++;
+				break;
+			case 2:
+				x += 1;
+				y += 1;
+				if (x >= 260)
+					state = 0;
+				break;
+			}
+		}
 	}
 }
 
