@@ -39,7 +39,6 @@ void gotoXY(int x, int y)
 	float theta2pos = t2pos * k_radToDeg;
 	float theta1neg = t1neg * k_radToDeg;
 	float theta2neg = t2neg * k_radToDeg;
-//	printf("T1+: %f, T2+: %f, T1-:%f, T2-:%f, ", theta1pos, theta2pos, theta1neg, theta2neg);
 
 	// At the point, we must determine which of the 4 angles are valid.
 	// Once we determine which of them are valid, we must contruct pairs of angles.
