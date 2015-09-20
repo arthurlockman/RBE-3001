@@ -203,47 +203,46 @@ void readCurrent()
 void pidButtons2()
 {
 	gotoAngles(0, 0);
-	debugUSARTInit(DEFAULT_BAUD);
-	initRBELib();
-	initSPI();
-	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration calUpper =
-	{ 250, 625, 975 };
-	initPot(0, 3, calUpper);
-	potCalibration calLower =
-	{ 255, 668, 1100 };
-	initPot(1, 2, calLower);
-	upperLinkActual = potAngle(0);
-	lowerLinkActual = potAngle(1);
-	configureMsTimer();
 	setPinsDir('A', INPUT, 4, PORT4, PORT5, PORT6, PORT7); //not using ADC channels other than 0 and 1, configure with those
-	setConst('U', 690.0, 3.0, 64.0); //set PID gains 690.0, 3.0, 64.0
-	setConst('L', 700.0, 6.0, 63.0);
 	unsigned long lastMs;
 	while (1)
 	{
 		if (getPinsVal('A', 1, PORT4))
 		{
-			gotoAngles(-90, -90);
+			//gotoAngles(-90, -90);
+			gotoXY(260, 0);
+//			printf("1\n\r");
 		}
 		else if (getPinsVal('A', 1, PORT5))
 		{
-			gotoAngles(-60, -60);
+			//gotoAngles(-60, -60);
+			gotoXY(0, -260);
+//			printf("2\n\r");
 		}
 		else if (getPinsVal('A', 1, PORT6))
 		{
-			gotoAngles(-30, -30);
+			//gotoAngles(-30, -30);
+			gotoXY(200, 0);
+//			printf("3\n\r");
 		}
 		else if (getPinsVal('A', 1, PORT7))
 		{
-			gotoAngles(0, 0);
+			//gotoAngles(0, 0);
+			gotoXY(0, -200);
+//			printf("4\n\r");
 		}
-		driveLink(2, pidOutputUpper);
-		driveLink(1, pidOutputLower);
 		upperLinkActual = potAngle(0);
 		lowerLinkActual = potAngle(1);
+		driveLink(2, pidOutputUpper);
+		driveLink(1, pidOutputLower);
 
-		printf("%d\n\r", getADC(2));
+		if (ms - lastMs >= 10)
+		{
+			printf("%d,%d\n\r", lowerLinkActual, upperLinkActual);
+			lastMs = ms;
+		}
+
+//		printf("%d\n\r", getADC(2));
 //		if (ms - lastMs >= 10)
 //		{
 //			// Calculate motor input voltage
@@ -349,17 +348,6 @@ void calcXY(int* pos)
 
 void testGotoXY()
 {
-	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration calUpper =
-	{ 250, 625, 975 };
-	initPot(0, 3, calUpper);
-	potCalibration calLower =
-	{ 255, 668, 1100 };
-	initPot(1, 2, calLower);
-	configureMsTimer();
-	setConst('U', 300.0, 0.0, 10.0); //set PID gains 690.0, 3.0, 64.0
-	setConst('L', 300.0, 0.0, 10.0);
-
 	int state = 0;
 	int x = 260;
 	int y = 0;
@@ -375,10 +363,8 @@ void testGotoXY()
 		gotoXY(x, y);
 		driveLink(2, pidOutputUpper);
 		driveLink(1, pidOutputLower);
-		// int pos[2];
-		// calcXY(pos);
-		//printf("%d, %d\n\r", pidOutputUpper, pidOutputLower);
-		printf("X: %d, Y: %d\n\r", x, y);
+
+//		printf("X: %d, Y: %d\n\r", x, y);
 		if (ms - lastms > 20)
 		{
 			lastms = ms;
@@ -407,18 +393,45 @@ void testGotoXY()
 	}
 }
 
+void testForwardKinematics()
+{
+	while(1)
+	{
+		int lowerTheta = (int)(getADC(4)*180.0/1024.0 - 90);
+		int upperTheta = (int)(getADC(5)*180.0/1024.0 - 90);
+		upperLinkActual = potAngle(0);
+		lowerLinkActual = potAngle(1);
+		gotoAngles(lowerTheta, upperTheta);
+		driveLink(1, pidOutputLower);
+		driveLink(2, pidOutputUpper);
+		int pos[2];
+		calcXY(pos);
+		// printf("%ld, %ld\n\r", pidOutputLower, pidOutputUpper);
+		printf("%d, %d, %d, %d, %d, %d\n\r", lowerTheta, upperTheta, lowerLinkActual, upperLinkActual, pos[0], pos[1]);
+	}
+}
+
+void setup()
+{
+	debugUSARTInit(DEFAULT_BAUD);					// Setup serial
+	initRBELib();									// Setup RBELib
+	initSPI();										// Setup SPI/DAC
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);		// Setup ADC
+	configureMsTimer();								// Setup ms timer and interrupts
+	potCalibration calUpper = { 250, 625, 975 };	// Setup upper arm pot
+	initPot(0, 3, calUpper);
+	potCalibration calLower = { 255, 668, 1100 };	// Setup lower arm pot
+	initPot(1, 2, calLower);
+	setConst('U', 300.0, 0.0, 10.0); 				// Setup upper arm gains
+	setConst('L', 300.0, 0.0, 10.0);				// Setup lower arm gains
+}
+
 int main(void)
 {
-	debugUSARTInit(DEFAULT_BAUD);
-	initRBELib();
-	initSPI();
-//	// pidButtons2();
-//	while(1)
-//	{
-//		int pos[2];
-//		calcXY(pos);
-//		printf("%d, %d\n\r", pos[0], pos[1]);
-//	}
-	testGotoXY();
+	setup();
+	pidButtons2();
+//	testForwardKinematics();
+//	testGotoXY();
+
 
 }
