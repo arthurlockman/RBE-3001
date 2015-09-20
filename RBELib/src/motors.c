@@ -20,7 +20,7 @@ void gotoAngles(int lowerTheta, int upperTheta)
 {
 	setSetpoint('U', upperTheta + 90);
 	setSetpoint('L', lowerTheta + 90);
-	// printf("Lower: %d, Upper: %d\n\r", lowerTheta, upperTheta);
+//	 printf("Lower: %d, Upper: %d, diff: %d\n\r", lowerTheta, upperTheta, lowerTheta - upperTheta);
 }
 
 void gotoXY(int x, int y)
@@ -39,7 +39,7 @@ void gotoXY(int x, int y)
 	float theta2pos = t2pos * k_radToDeg;
 	float theta1neg = t1neg * k_radToDeg;
 	float theta2neg = t2neg * k_radToDeg;
-	printf("T1+: %f, T2+: %f, T1-:%f, T2-:%f, ", theta1pos, theta2pos, theta1neg, theta2neg);
+//	printf("T1+: %f, T2+: %f, T1-:%f, T2-:%f, ", theta1pos, theta2pos, theta1neg, theta2neg);
 
 	// At the point, we must determine which of the 4 angles are valid.
 	// Once we determine which of them are valid, we must contruct pairs of angles.
@@ -49,37 +49,18 @@ void gotoXY(int x, int y)
 	if (IN_RANGE(theta1pos, 90, -90) && IN_RANGE(theta2pos, 90, -90) && IN_RANGE(theta1neg, 90, -90) && IN_RANGE(theta2neg, 90, -90))
 	{
 		//TODO: Decide which to go to if both are valid
-		int dt1pos, dt2pos, dt1neg, dt2neg;
-		dt1pos = abs(getSetpoint('L') - theta1pos);
-		dt2pos = abs(getSetpoint('U') - theta2pos);
-		dt1neg = abs(getSetpoint('L') - theta1neg);
-		dt2neg = abs(getSetpoint('U') - theta2neg);
-
-		if(dt1pos <= dt1neg)
+		if (y <= 0)
 		{
-			if(dt2pos <= dt2neg)
-			{
-				printf("1, ");
+			if (theta1pos - theta2pos >= 0)
 				gotoAngles(theta1pos, theta2pos);
-			}
 			else
-			{
-				printf("2, ");
-				gotoAngles(theta1pos, theta2neg);
-			}
-		}
-		else
-		{
-			if(dt2pos <= dt2neg)
-			{
-				printf("3, ");
-				gotoAngles(theta1neg, theta2pos);
-			}
-			else
-			{
-				printf("4, ");
 				gotoAngles(theta1neg, theta2neg);
-			}
+		} else
+		{
+			if (theta1pos - theta2pos <= 0)
+				gotoAngles(theta1pos, theta2pos);
+			else
+				gotoAngles(theta1neg, theta2neg);
 		}
 	} else if (IN_RANGE(theta1pos, 90, -90) && IN_RANGE(theta2pos, 90, -90))
 	{
