@@ -63,19 +63,15 @@ void gotoXY(int x, int y)
 		}
 	} else if (IN_RANGE(theta1pos, 90, -90) && IN_RANGE(theta2pos, 90, -90))
 	{
-		printf("5, ");
 		gotoAngles(theta1pos, theta2pos);
 	} else if (IN_RANGE(theta1neg, 90, -90) && IN_RANGE(theta2neg, 90, -90))
 	{
-		printf("6, ");
 		gotoAngles(theta1neg, theta2neg);
 	}
 	else
 	{
 		// printf("Not in range. \n\r");
 	}
-
-
 }
 
 // TODO Implement different links
