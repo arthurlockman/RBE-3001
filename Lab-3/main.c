@@ -42,18 +42,55 @@ void setup()
 	initPot(1, 2, calLower);
 	setConst('U', 300.0, 0.0, 10.0); 				// Setup upper arm gains
 	setConst('L', 300.0, 0.0, 10.0);				// Setup lower arm gains
+	encInit(0);
+	encInit(1);
+}
+
+void home()
+{
+	gotoAngles(0,0);
+	upperLinkActual = potAngle(0);
+	lowerLinkActual = potAngle(1);
+
+	while(!IN_RANGE(upperLinkActual,91,89)|| !IN_RANGE(lowerLinkActual,91,89))
+	{
+		upperLinkActual = potAngle(0);
+		lowerLinkActual = potAngle(1);
+
+		driveLink(2, pidOutputUpper);
+		driveLink(1, pidOutputLower);
+
+		printf("%d, %d\n\r", upperLinkActual, lowerLinkActual);
+	}
+	stopMotors();
+	_delay_ms(500);
+	resetEncCount(0);
+	resetEncCount(1);
 }
 
 int main(void)
 {
-	DDRBbits._P4 = OUTPUT;
-	DDRBbits._P4 = OUTPUT;
-	while (1)
+	setup();
+
+//	DDRBbits._P4 = OUTPUT;
+//	DDRBbits._P4 = OUTPUT;
+//	while (1)
+//	{
+//		PINBbits._P4 = 0;
+//		_delay_ms(100);
+//		PINBbits._P4 = 1;
+//		_delay_ms(100);
+//	}
+
+	home();
+	printf("Homed.\n\r");
+	while(1)
 	{
-		PINBbits._P4 = 0;
-		_delay_ms(100);
-		PINBbits._P4 = 1;
-		_delay_ms(100);
+		long count0 = encCount(0);
+		long count1 = encCount(1);
+		printf("%ld, %ld\n\r", count0, count1);
 	}
-	return 0;
+
+
+
 }
