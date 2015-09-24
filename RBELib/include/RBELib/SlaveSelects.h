@@ -113,5 +113,9 @@
  */
 #define ENCODER_IRQ_ddr DDRBbitd._P2
 
+#define ACC_SS_ddr DDRDbits._P7
+
+#define ACC_SS PORTDbits._P7
+
 
 #endif /* SLAVESELECTS_H_ */
