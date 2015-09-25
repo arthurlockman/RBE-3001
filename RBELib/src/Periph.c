@@ -7,7 +7,48 @@
 
 #include "RBELib/RBELib.h"
 
-// signed int getAccel(int axis);
+signed int getAccel(char axis)
+{
+	SPCR &= 0b00000000;
+	SPCR |= 0b01010100; // Set sample to falling edge
+	ACC_SS_ddr = OUTPUT;
+	ACC_SS = LOW;
+	signed int val = 0;
+	int vref = 0;
+
+	// Send command then read next 12 bits
+	// Command on rising edge, read on falling edge
+	spiTransceive(0b00011011);
+	vref |= (unsigned int)spiTransceive(0) << 4;
+	vref |= (unsigned int)spiTransceive(0) >> 4;
+
+	ACC_SS = HIGH;
+	ACC_SS = LOW;
+	switch (axis)
+	{
+	case 'X':
+	case 'x':
+		spiTransceive(0b00011000);
+		break;
+	case 'Y':
+	case 'y':
+		spiTransceive(0b00011001);
+		break;
+	case 'Z':
+	case 'z':
+		spiTransceive(0b00011010);
+		break;
+	}
+	val |= (int)spiTransceive(0) << 4;
+	val |= (int)spiTransceive(0) >> 4;
+
+	ACC_SS = HIGH;
+	SPCR &= 0b00000000;
+	SPCR |= 0b01010000; // Set sample to rising edge
+
+//	return vref;
+	return (signed int)((val - vref) * 0.0022);
+}
 
 // int IRDist(int chan);
 

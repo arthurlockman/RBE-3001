@@ -18,7 +18,7 @@
  *
  * @todo Create a function that is able to find the acceleration of a given axis.
  */
-signed int getAccel(int axis);
+signed int getAccel(char axis);
 
 /** 
  * @brief Read an IR sensor and calculate the distance of the block.
