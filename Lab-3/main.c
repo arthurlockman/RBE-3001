@@ -11,7 +11,7 @@ short count;
 short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
-
+volatile int x_accel, y_accel, z_accel;
 ISR(TIMER0_OVF_vect)
 {
 	count++;
@@ -20,6 +20,9 @@ ISR(TIMER0_OVF_vect)
 		ms++;
 		count = 1;
 		pidCount++;
+		x_accel = getAccel('x');
+		y_accel = getAccel('y');
+		z_accel = getAccel('z');
 	}
 	if (pidCount == 9)
 	{
@@ -82,13 +85,13 @@ int main(void)
 //		_delay_ms(100);
 //	}
 
-	home();
-	printf("Homed.\n\r");
+//	home();
+//	printf("Homed.\n\r");
 	while(1)
 	{
-		long count0 = encCount(0);
-		long count1 = encCount(1);
-		printf("%ld, %ld\n\r", count0, count1);
+//		long count0 = encCount(0);
+//		long count1 = encCount(1);
+		printf("%d, %d, %d\n\r", x_accel, y_accel, z_accel);
 	}
 
 
