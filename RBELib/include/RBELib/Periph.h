@@ -20,6 +20,11 @@
  */
 signed int getAccel(char axis);
 
+inline float convertAccel(int val)
+{
+	return (val * 0.0022);
+}
+
 /** 
  * @brief Read an IR sensor and calculate the distance of the block.
  * @param  chan The port that the IR sensor is on.

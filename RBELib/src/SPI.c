@@ -15,7 +15,7 @@ void initSPI()
 	SPI_MASTER_SS = OUTPUT;
 	DAC_SS_ddr = OUTPUT;
 	DAC_SS = HIGH;
-	// No interrupts, enable, MSB first, master mode, rising then falling, sample then setup, Fosc/4
+	// No interrupts, enable, MSB first, master mode, rising then falling, sample then setup, Fosc/64
 	SPCR &= 0b00000000;
 	SPCR |= 0b01010000;
 }

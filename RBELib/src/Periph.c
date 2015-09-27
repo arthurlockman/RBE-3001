@@ -9,18 +9,17 @@
 
 signed int getAccel(char axis)
 {
-	SPCR &= 0b00000000;
-	SPCR |= 0b01010100; // Set sample to falling edge
+	cli();
+	SPCR |= 0b00000011;
+	int vref = 0;
+	int val = 0;
 	ACC_SS_ddr = OUTPUT;
 	ACC_SS = LOW;
-	signed int val = 0;
-	int vref = 0;
 
-	// Send command then read next 12 bits
-	// Command on rising edge, read on falling edge
-	spiTransceive(0b00011011);
-	vref |= (unsigned int)spiTransceive(0) << 4;
-	vref |= (unsigned int)spiTransceive(0) >> 4;
+	spiTransceive(0b01101100);
+
+	vref |= (spiTransceive(0b00000000) << 4);
+	vref |= (spiTransceive(0b00000000) >> 4);
 
 	ACC_SS = HIGH;
 	ACC_SS = LOW;
@@ -28,26 +27,25 @@ signed int getAccel(char axis)
 	{
 	case 'X':
 	case 'x':
-		spiTransceive(0b00011000);
+		spiTransceive(0b01100000);
 		break;
 	case 'Y':
 	case 'y':
-		spiTransceive(0b00011001);
+		spiTransceive(0b01100100);
 		break;
 	case 'Z':
 	case 'z':
-		spiTransceive(0b00011010);
+		spiTransceive(0b01101000);
 		break;
 	}
-	val |= (int)spiTransceive(0) << 4;
-	val |= (int)spiTransceive(0) >> 4;
 
+	val |= (spiTransceive(0b00000000) << 4);
+	val |= (spiTransceive(0b00000000) >> 4);
 	ACC_SS = HIGH;
-	SPCR &= 0b00000000;
-	SPCR |= 0b01010000; // Set sample to rising edge
 
-//	return vref;
-	return (signed int)((val - vref) * 0.0022);
+	SPCR &= 0b11111100;
+	sei();
+	return val - vref;
 }
 
 // int IRDist(int chan);
