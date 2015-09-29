@@ -12,6 +12,7 @@ short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
 volatile int x_accel, y_accel, z_accel;
+int runPid = 1;
 ISR(TIMER0_OVF_vect)
 {
 	count++;
@@ -21,7 +22,7 @@ ISR(TIMER0_OVF_vect)
 		count = 1;
 		pidCount++;
 	}
-	if (pidCount == 9)
+	if (pidCount >= 9 && runPid)
 	{
 		pidCount = 1;
 		upperLinkActual = potAngle(0);
@@ -63,10 +64,42 @@ void home()
 	resetEncCount(1);
 }
 
+void collectEncoderData(void)
+{
+	unsigned long accMs = ms;
+	unsigned long printMs = ms;
+	setPinsDir('B', INPUT, 2, PORT0, PORT1, PORT2, PORT3);
+	int speed = 0;
+	runPid = 0;
+	while(1)
+	{
+		if (getPinsVal('B', 1, PORT0))
+		{
+			speed = 0;
+		} else if (getPinsVal('B', 1, PORT1))
+		{
+			speed = -805;
+		} else if (getPinsVal('B', 1, PORT2))
+		{
+			speed = 805;
+		} else if (getPinsVal('B', 1, PORT3))
+		{
+			speed = 1610;
+		}
+		driveLink(2, speed);
+		driveLink(1, 0);
+		if (ms - printMs >= 10)
+		{
+			printf("%ld\n\r", encCount(1));
+			printMs = ms;
+		}
+	}
+}
 int main(void)
 {
 	setup();
 
+	collectEncoderData();
 	home();
 	printf("Homed.\n\r");
 	unsigned long accMs = ms;
