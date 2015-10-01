@@ -11,7 +11,15 @@ short count;
 short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
-volatile int x_accel, y_accel, z_accel;
+
+typedef struct
+{
+	float x;
+	float y;
+	float time;
+
+} pickupInfo;
+
 ISR(TIMER0_OVF_vect)
 {
 	count++;
@@ -32,6 +40,7 @@ ISR(TIMER0_OVF_vect)
 		driveLink(1, pidOutputLower);
 	}
 }
+
 
 void setup()
 {
@@ -56,49 +65,59 @@ void home()
 
 	while(!IN_RANGE(upperLinkActual,91,89)|| !IN_RANGE(lowerLinkActual,91,89))
 	{
-		printf("%d, %d\n\r", upperLinkActual, lowerLinkActual);
+		// printf("%d, %d\n\r", upperLinkActual, lowerLinkActual);
 	}
 	_delay_ms(500);
 	resetEncCount(0);
 	resetEncCount(1);
 }
 
+pickupInfo calcPickupInfo()
+{
+	// Once we reach the threshhol (12 or 13) AND the value is stable (5-6 readings of the same value), log that time
+
+	float deltaX = 16;
+	int deltaT;
+	float distanceToArmCenter = 3;
+
+	long startTime = ms;
+
+	int startIRVal_1 = IRDist(6);
+	int startIRVal_2 = IRDist(7);
+
+	printf("Start values: %d, %d\n\r", startIRVal_1, startIRVal_2);
+
+	while(startIRVal_1 - IRDist(6) < 2)
+		printf("Current IR1: %d\n\r", IRDist(6));
+	long passTime1 = ms;
+
+	while(startIRVal_2 - IRDist(7) < 2)
+		printf("Current IR2: %d\n\r", IRDist(7));
+	long passTime2 = ms;
+
+	deltaT = (int)(passTime2 - passTime1);
+
+	float velocity = deltaX / (float)deltaT;
+
+	float timeToPickup = distanceToArmCenter/velocity;
+
+	pickupInfo info;
+	info.time = timeToPickup;
+
+	return info;
+
+}
+
 int main(void)
 {
 	setup();
-
-	home();
-	printf("Homed.\n\r");
-	unsigned long accMs = ms;
-	unsigned long printMs = ms;
-	setPinsDir('B', INPUT, 2, PORT0, PORT1);
-	int angle = 0;
+//	home();
+//	setServo(0, 0);
+//	pickupInfo info = calcPickupInfo();
+//	printf("Time to interception: %f\n\r", info.time);
 	while(1)
 	{
-//		printf("Stuff!\n\r");
-		if (ms - accMs > 1)
-		{
-			 x_accel = getAccel('x');
-			 y_accel = getAccel('y');
-			 z_accel = getAccel('z');
-			accMs = ms;
-		}
-		if (getPinsVal('B', 1, PORT0))
-		{
-			angle = 0;
-//			printf("Going to 0\n\r");
-		} else if (getPinsVal('B', 1, PORT1))
-		{
-			angle = -90;
-//			printf("Going to 90\n\r");
-		}
-		gotoAngles(angle, 0);
-		if (ms - printMs >= 10)
-		{
-			printf("%d,%d,%ld,%ld,%f,%f,%f\n\r", lowerLinkActual - 90, upperLinkActual - 90,
-					encCount(0), encCount(1), convertAccel(x_accel), convertAccel(y_accel),
-					convertAccel(z_accel));
-			printMs = ms;
-		}
+		printf("IR Values: %d, %d\n\r", IRDist(6), IRDist(7));
 	}
+
 }
