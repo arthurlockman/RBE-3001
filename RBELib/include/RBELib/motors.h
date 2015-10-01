@@ -62,4 +62,8 @@ void homePos();
 //@TODO: Comments
 int readCurrentMilliamps(int link);
 
+void openGripper(int servoNum);
+
+void closeGripper(int servoNum);
+
 #endif /* MOTORS_H_ */

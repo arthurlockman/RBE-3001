@@ -123,4 +123,14 @@ int readCurrentMilliamps(int link)
 	return -(int)(((value - 542) / 1024.0) * 5000.0);
 }
 
+void openGripper(int servoNum)
+{
+	setServo(servoNum, 0);
+}
+
+void closeGripper(int servoNum)
+{
+	setServo(servoNum, 180);
+}
+
 // void homePos();

@@ -150,3 +150,11 @@ signed long encCount(int chan)
 		}
 	return encValue;
 }
+
+int IRDist(int chan)
+{
+	int IRVal = getADC(chan);
+	int distance = (6787 / (IRVal - 3)) - 4;
+	return distance;
+
+}
