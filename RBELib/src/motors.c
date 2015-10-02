@@ -133,4 +133,31 @@ void closeGripper(int servoNum)
 	setServo(servoNum, 180);
 }
 
+void calcXY(int* pos)
+{
+	float a1 = 152.4; // in mm
+	float a2 = 155.00; // in mm
+
+	float x, y;
+
+	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+	potCalibration calUpper =
+	{ 250, 625, 975 };
+	initPot(0, 3, calUpper);
+	potCalibration calLower =
+	{ 255, 668, 1100 };
+	initPot(1, 2, calLower);
+
+	float lowerLinkActualRad = (potAngleFloat(1) - 90.0) * 0.01745329251; // degToRad constant
+	float upperLinkActualRad = (potAngleFloat(0) - 90.0) * 0.01745329251;
+
+	x = (cos(lowerLinkActualRad) * a1 + cos(upperLinkActualRad + lowerLinkActualRad) * a2);
+	y = (sin(lowerLinkActualRad) * a1 + sin(upperLinkActualRad + lowerLinkActualRad) * a2);
+	// printf("%f, %f, %f, %f\n\r", potAngleFloat(1) - 90.0, potAngleFloat(0) - 90.0, x, y);
+
+	pos[0] = (int)x;
+	pos[1] = (int)y;
+
+}
+
 // void homePos();

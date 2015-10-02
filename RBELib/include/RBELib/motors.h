@@ -19,6 +19,7 @@
  * @todo Create way to stop the motors using the DAC.
  */
 void stopMotors();
+void calcXY(int* pos);
 
 /**
  * @brief Drive the arm to a desired angle
