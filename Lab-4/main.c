@@ -49,9 +49,9 @@ void setup()
 	initSPI();										// Setup SPI/DAC
 	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);		// Setup ADC
 	configureMsTimer();								// Setup ms timer and interrupts
-	potCalibration calUpper = { 250, 625, 975 };	// Setup upper arm pot
+	potCalibration calUpper = { 259, 645, 1014 };	// Setup upper arm pot
 	initPot(0, 3, calUpper);
-	potCalibration calLower = { 255, 668, 1100 };	// Setup lower arm pot
+	potCalibration calLower = { 260, 680, 1070 };	// Setup lower arm pot
 	initPot(1, 2, calLower);
 	setConst('U', 300.0, 0.0, 10.0); 				// Setup upper arm gains
 	setConst('L', 300.0, 0.0, 10.0);				// Setup lower arm gains
@@ -72,92 +72,67 @@ void home()
 	resetEncCount(1);
 }
 
-int normalVariance(int* readings, int numReadings, float average)
-{
-	float variance = 0;
-	for(int i = 0; i < numReadings; i++)
-	{
-		variance += pow(readings[i] - average, 2);
-	}
-	variance /= numReadings;
-
-	float stdDev = sqrt(variance);
-
-	if(stdDev <= 1) return 1;
-	else return 0;
-
-
-}
-
 int stableValue(int channel)
 {
-	int numReadings = 7;
-	int readings[numReadings];
+	int startValue = IRDist(channel);
+	int hasTriggered = 0;
+	int numVals = 7;
 	float sum = 0;
-	for(int i = 0; i < numReadings; i++)
+	int min = 100;
+	float average;
+	int vals[numVals];
+
+	for(int i = 0; i < numVals; i++)
 	{
-		readings[i] = IRDist(channel);
-		sum += readings[i];
-		_delay_ms(1);
+		vals[i] = IRDist(channel);
+		_delay_ms(5);
 	}
 
-	float average = sum / numReadings;
+	int i = 0;
 
-	if((abs(readings[0] - readings[numReadings - 1]) <= 2) && normalVariance(readings, numReadings, average))
+	while((hasTriggered == 0) || (IRDist(channel)!=startValue))
 	{
-		return (int)average;
-	}
-	else
-	{
-		return -1;
-	}
-}
+		// Moving average
+		vals[i%numVals] = IRDist(channel);
 
-int average(int channel)
-{
-	int numReadings = 7;
-	int readings[numReadings];
-	float sum = 0;
-	for(int i = 0; i < numReadings; i++)
-	{
-		readings[i] = IRDist(channel);
-		sum += readings[i];
-		_delay_ms(1);
-	}
+		sum = 0;
+		for(int p = 0; p < numVals; p++)
+		{
+			sum += vals[p];
+		}
+		average = sum / numVals;
 
-	float average = sum / numReadings;
-	return (int)(average);
+		// If less than the minimum, make minimum
+		if(average < min) {min = (int)average;printf("New min: %d\n\r", min);}
+
+		// Check triggered
+		if(min < 14) {hasTriggered = 1;}
+
+
+		i++;
+		_delay_ms(5);
+	}
+	return min;
 }
 
 pickupInfo calcPickupInfo()
 {
-	// Once we reach the threshhold (12 or 13) AND the value is stable (5-6 readings of the same value), log that time
-
-	float deltaX = 16;
+	float deltaX = 7.75;
 	int deltaT;
-	float distanceToArmCenter = 3;
+	float distanceToArmCenter = 11.25;
 
-	int startIRVal_1 = IRDist(6);
-	int startIRVal_2 = IRDist(7);
+	int startIRVal_1 = -1;
+	int startIRVal_2 = -1;
 
-	while(1)
-	{
-		startIRVal_1 = stableValue(6);
-		if(startIRVal_1 != -1 &&  average(6) < 12)
-		{
-			break;
-		}
-	}
+	startIRVal_1 = stableValue(6);
 	long passTime1 = ms;
 
-	while(1)
-	{
-		startIRVal_2 = stableValue(7);
-		if(startIRVal_2 != -1 &&  average(7) < 12)
-		{
-			break;
-		}
-	}
+	int tmp_y = - 175 - ((startIRVal_1) / 2.0 - 6.0) * 10;
+	int tmp_x = - 20.0 + (tmp_y + 175) * (-30.0/65.0) + 30;
+	gotoXY(tmp_x, tmp_y);
+
+
+	startIRVal_2 = stableValue(7);
 	long passTime2 = ms;
 
 	printf("Start values: %d, %d\n\r", startIRVal_1, startIRVal_2);
@@ -169,12 +144,21 @@ pickupInfo calcPickupInfo()
 	printf("Velocity: %f\n\r", velocity);
 
 	float timeToPickup = distanceToArmCenter/velocity;
+	printf("Time: %f\n\r", timeToPickup);
 
 	pickupInfo info;
-	info.time = timeToPickup;
-	info.x = 0.0;
-	info.y = - 200 - ((startIRVal_1 + startIRVal_2) / 2.0 - 6) *10;
+	info.y = - 175 - ((startIRVal_1 + startIRVal_2) / 2.0 - 6.0) * 10;
+	info.x = - 18.0 + (info.y + 175) * (-20.0/65.0);
+	info.time = timeToPickup - 1000 + -175.0*(info.y + 175.0)/65.0;
 	return info;
+
+}
+
+void waitForArmMovement()
+{
+	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 1, upperLinkSetpoint - 1) &&
+			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 1, lowerLinkSetpoint - 1))
+	;
 
 }
 
@@ -183,28 +167,35 @@ int main(void)
 	setup();
 	home();
 	openGripper(1);
-	gotoXY(60, -200);
+	gotoXY(30, -220);
+	waitForArmMovement();
 	setServo(0, 0);
 	pickupInfo info = calcPickupInfo();
 	_delay_ms((int)info.time);
-	printf("%d, %d", (int)info.x, (int)info.y);
-	gotoXY(0, (int)info.y);
-	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint - 1, upperLinkSetpoint + 1) &&
-			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint - 1, lowerLinkSetpoint + 1))
-		;
+	printf("Pickup pos: %d, %d\n\r\n\r", (int)info.x, (int)info.y);
+	gotoXY((int)info.x, (int)info.y);
+	waitForArmMovement();
 	closeGripper(1);
-	_delay_ms(1000);
-	gotoXY(60, -200);
-//	while(1)
-//	{
+	_delay_ms(500);
+	gotoXY(30, -220);
+	waitForArmMovement();
+
+	while(1)
+	{
 //		int pos[2];
 //		calcXY(pos);
-//		printf("%d \t %d\n\r", pos[0], pos[1]);
-//		_delay_ms(10);
-////	printf("IR Values: %d, %d\n\r", IRDist(6), IRDist(7));
+//		printf("%d, %d", pos[0], pos[1]);
+//		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
+//		_delay_ms(100);
+	}
+//	long sum1 = 0;
+//	long sum2 = 0;
+//	for(int i = 0; i < 100; i++)
+//	{
+//		sum1 += getADC(2);
+//		sum2 += getADC(3);
 //	}
-	while(1)
-		;
+//	printf("%f, %f\n\r", sum1/100.0, sum2/100.0);
 
 
 }
