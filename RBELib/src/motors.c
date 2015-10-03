@@ -9,6 +9,8 @@
 
 const float k_degToRad = 0.01745329251;
 const float k_radToDeg = 57.2957795;
+const float A1 = 152.4; // 152.4
+const float A2 = 150.00;
 
  void stopMotors()
  {
@@ -25,8 +27,8 @@ void gotoAngles(int lowerTheta, int upperTheta)
 
 void gotoXY(int x, int y)
 {
-	float link1 = 152.4; // mm
-	float link2 = 111.76; // mm
+	float link1 = A1; // mm
+	float link2 = A2; // mm
 	float x1 = sqrt(1 - pow((pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2), 2));
 	float x2 = (pow(x, 2) + pow(y, 2) - pow(link1, 2) - pow(link2, 2)) / (2 * link1 * link2);
 	float t2pos = atan2(x1, x2);
@@ -70,7 +72,8 @@ void gotoXY(int x, int y)
 	}
 	else
 	{
-		// printf("Not in range. \n\r");
+		printf("Not in range. \n\r");
+		gotoAngles(theta1neg, theta2neg);
 	}
 }
 
@@ -135,18 +138,18 @@ void closeGripper(int servoNum)
 
 void calcXY(int* pos)
 {
-	float a1 = 152.4; // in mm
-	float a2 = 155.00; // in mm
+	float a1 = A1; // in mm
+	float a2 = A2; // in mm
 
 	float x, y;
 
-	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
-	potCalibration calUpper =
-	{ 250, 625, 975 };
-	initPot(0, 3, calUpper);
-	potCalibration calLower =
-	{ 255, 668, 1100 };
-	initPot(1, 2, calLower);
+//	initADC(3, ADC_FREE_RUNNING, ADC_REF_VCC);
+//	potCalibration calUpper =
+//	{ 250, 625, 975 };
+//	initPot(0, 3, calUpper);
+//	potCalibration calLower =
+//	{ 255, 668, 1100 };
+//	initPot(1, 2, calLower);
 
 	float lowerLinkActualRad = (potAngleFloat(1) - 90.0) * 0.01745329251; // degToRad constant
 	float upperLinkActualRad = (potAngleFloat(0) - 90.0) * 0.01745329251;
