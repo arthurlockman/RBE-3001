@@ -11,6 +11,7 @@ short count;
 short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
+int slow = 0;
 
 typedef struct
 {
@@ -36,8 +37,16 @@ ISR(TIMER0_OVF_vect)
 		lowerLinkActual = potAngle(1);
 		pidOutputUpper = calcPID('U', upperLinkActual);
 		pidOutputLower = calcPID('L', lowerLinkActual);
-		driveLink(2, pidOutputUpper);
-		driveLink(1, pidOutputLower);
+		if(slow == 0)
+		{
+			driveLink(2, pidOutputUpper);
+			driveLink(1, pidOutputLower);
+		}
+		else
+		{
+			driveLinkSlow(2, pidOutputUpper);
+			driveLinkSlow(1, pidOutputLower);
+		}
 	}
 }
 
@@ -74,7 +83,7 @@ void home()
 
 int stableValue(int channel)
 {
-	int startValue = IRDist(channel);
+
 	int hasTriggered = 0;
 	int numVals = 7;
 	float sum = 0;
@@ -87,10 +96,17 @@ int stableValue(int channel)
 		vals[i] = IRDist(channel);
 		_delay_ms(5);
 	}
+	sum = 0;
+	for(int p = 0; p < numVals; p++)
+	{
+		sum += vals[p];
+	}
+	average = sum / numVals;
+	int startValue = (int)average;
 
 	int i = 0;
 
-	while((hasTriggered == 0) || ((int)average!=startValue))
+	while((hasTriggered == 0) || (int)average != startValue)
 	{
 		// Moving average
 		vals[i%numVals] = IRDist(channel);
@@ -106,7 +122,7 @@ int stableValue(int channel)
 		if(average < min) {min = (int)average;printf("New min: %d\n\r", min);}
 
 		// Check triggered
-		if(min < 14) {hasTriggered = 1;}
+		if(min < 13) {hasTriggered = 1;}
 
 
 		i++;
@@ -146,27 +162,62 @@ pickupInfo calcPickupInfo()
 	// printf("Time: %f\n\r", timeToPickup);
 
 	pickupInfo info;
-	info.y = - 188 - ((startIRVal_1 + startIRVal_2) / 2.0 - 6.0) * 10;
-	info.x = - 20.0 + (info.y + 173) * (-27.0/65.0);
-	info.time = timeToPickup - 1000 + -175.0*(info.y + 175.0)/65.0;
+	info.y = - 190 - ((startIRVal_1 + startIRVal_2) / 2.0 - 5.5) * 10;
+	info.x = - 20.0 + (info.y + 180) * (-35.0/62.0);
+	info.time = timeToPickup - 1100;// + -180*(info.y + 180.0)/62.0;
 	return info;
 
 }
 
 void waitForArmMovement()
 {
-//	int maxCurrent = 0;
-	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 1, upperLinkSetpoint - 1) ||
-			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 1, lowerLinkSetpoint - 1))
+	long startTime = ms;
+	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
+			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
-//		int current = readCurrentMilliamps(1) + readCurrentMilliamps(2);
-//		if(current > maxCurrent)
-//		{
-//			maxCurrent = current;
-//		}
+		if(ms - startTime > 5000)
+			break;
 	}
-//	return maxCurrent;
 
+
+}
+
+void timerWeighingRoutine()
+{
+	gotoAngles(-90,30);
+	waitForArmMovement();
+	_delay_ms(500);
+	slow = 1;
+	long startTime = ms;
+	gotoAngles(-90,90);
+	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
+				!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
+	{
+		if(ms - startTime > 5000)
+			break;
+	}
+	long weighingTime = ms - startTime;
+	printf("Time: %ld\n\r", weighingTime);
+	_delay_ms(1000);
+	slow = 0;
+	if(weighingTime <= 4000)// Light weight
+	{
+		printf("Light weight.\n\r");
+		gotoXY(0,-300);
+		waitForArmMovement();
+		_delay_ms(500);
+		openGripper(1);
+		_delay_ms(500);
+	}
+	else // Heavy weight
+	{
+		printf("Heavy weight.\n\r");
+		gotoXY(30, -200);
+		waitForArmMovement();
+		_delay_ms(500);
+		openGripper(1);
+		_delay_ms(500);
+	}
 }
 
 int main(void)
@@ -174,6 +225,7 @@ int main(void)
 	setup();
 	while(1)
 	{
+		setup();
 		home();
 		openGripper(1);
 		gotoXY(30, -220);
@@ -188,54 +240,17 @@ int main(void)
 		_delay_ms(500);
 		gotoXY(30, -220);
 		waitForArmMovement();
-		// Weighing routine
-		gotoXY(30, -220);
-		waitForArmMovement();
-		gotoXY(30, -270);
-		waitForArmMovement();
-		long startTime = ms;
-		_delay_ms(500);
-		gotoXY(300, 0);
-		waitForArmMovement();
-		long weighingTime = ms - startTime;
-		printf("Time: %ld\n\r", weighingTime);
-		_delay_ms(1000);
-		if(weighingTime <= 2050)// Light weight
-		{
-			printf("Light weight.\n\r");
-			gotoXY(0,-300);
-			waitForArmMovement();
-			_delay_ms(500);
-			openGripper(1);
-			_delay_ms(500);
-		}
-		else // Heavy weight
-		{
-			printf("Heavy weight.\n\r");
-			gotoXY(30, -200);
-			waitForArmMovement();
-			_delay_ms(500);
-			openGripper(1);
-			_delay_ms(500);
-		}
+
+//		Weighing routine
+		timerWeighingRoutine();
 	}
 
 	while(1)
 	{
 		int pos[2];
 		calcXY(pos);
-		printf("%d, %d\n\r", pos[0], pos[1]);
-//		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
-//		_delay_ms(100);
+		printf("%d, %d", pos[0], pos[1]);
+		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
+		_delay_ms(100);
 	}
-//	long sum1 = 0;
-//	long sum2 = 0;
-//	for(int i = 0; i < 100; i++)
-//	{
-//		sum1 += getADC(2);
-//		sum2 += getADC(3);
-//	}
-//	printf("%f, %f\n\r", sum1/100.0, sum2/100.0);
-
-
 }
