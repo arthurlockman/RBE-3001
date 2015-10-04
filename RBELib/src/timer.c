@@ -79,10 +79,10 @@ void setTimerPeriod(int timer, double freq)
 		}
 	}
 
-	printf("Prescaler: %d\n\r", scale);
+	//printf("Prescaler: %d\n\r", scale);
 	//calculate value to compare to
 	unsigned int comp = (int) (8000000 / (2 * scale * freq)) - 1;
-	printf("Compare: %#X\n\r", comp);
+	//printf("Compare: %#X\n\r", comp);
 
 	//set values of prescaler and compare
 	setPrescale(timer, prescaler);

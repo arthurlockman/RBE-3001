@@ -145,7 +145,7 @@ signed long encCount(int chan)
 			encValue = -encValue;
 			break;
 		default:
-			printf("Ya fucked up.");
+			//printf("Ya fucked up.");
 			break;
 		}
 	return encValue;

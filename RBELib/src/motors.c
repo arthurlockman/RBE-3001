@@ -72,7 +72,7 @@ void gotoXY(int x, int y)
 	}
 	else
 	{
-		printf("Not in range. \n\r");
+		// printf("Not in range. \n\r");
 		gotoAngles(theta1neg, theta2neg);
 	}
 }
