@@ -12,6 +12,9 @@ short pidCount;
 volatile int upperLinkActual, lowerLinkActual;
 volatile long pidOutputUpper, pidOutputLower;
 int slow = 0;
+int blockType = 3;
+int distance = -1;
+int pickedUp = 0;
 
 typedef struct
 {
@@ -66,6 +69,9 @@ void setup()
 	setConst('L', 300.0, 0.0, 10.0);				// Setup lower arm gains
 	encInit(0);
 	encInit(1);
+	blockType = 3;
+	distance = -1;
+	pickedUp = 0;
 }
 
 void home()
@@ -74,7 +80,7 @@ void home()
 
 	while(!IN_RANGE(upperLinkActual,91,89)|| !IN_RANGE(lowerLinkActual,91,89))
 	{
-		// printf("%d, %d\n\r", upperLinkActual, lowerLinkActual);
+		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 	}
 	_delay_ms(500);
 	resetEncCount(0);
@@ -119,7 +125,7 @@ int stableValue(int channel)
 		average = sum / numVals;
 
 		// If less than the minimum, make minimum
-		if(average < min) {min = (int)average;printf("New min: %d\n\r", min);}
+		if(average < min) {min = (int)average;/*printf("New min: %d\n\r", min);*/}
 
 		// Check triggered
 		if(min < 13) {hasTriggered = 1;}
@@ -128,6 +134,9 @@ int stableValue(int channel)
 		i++;
 		_delay_ms(5);
 	}
+	distance = min;
+	blockType = 0;
+	printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 	return min;
 }
 
@@ -150,7 +159,7 @@ pickupInfo calcPickupInfo()
 	startIRVal_2 = stableValue(7);
 	long passTime2 = ms;
 
-	printf("Start values: %d, %d\n\r", startIRVal_1, startIRVal_2);
+	// printf("Start values: %d, %d\n\r", startIRVal_1, startIRVal_2);
 
 	deltaT = (int)(passTime2 - passTime1);
 	// printf("Delta time: %d\n\r", deltaT);
@@ -175,6 +184,7 @@ void waitForArmMovement()
 	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
 			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
+		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 		if(ms - startTime > 5000)
 			break;
 	}
@@ -193,29 +203,45 @@ void timerWeighingRoutine()
 	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
 				!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
+		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 		if(ms - startTime > 5000)
 			break;
 	}
 	long weighingTime = ms - startTime;
-	printf("Time: %ld\n\r", weighingTime);
+	// printf("Time: %ld\n\r", weighingTime);
 	_delay_ms(1000);
 	slow = 0;
+
+//	// Shaking Routine
+//	setConst('U', 1000.0, 0.0, 0.0);
+//	setConst('L', 1000.0, 0.0, 0.0);
+//	gotoAngles(-90, 30);
+//	startTime = ms;
+//	while(ms - startTime < 5000)
+//		;
+//	setConst('U', 300.0, 0.0, 10.0);
+//	setConst('L', 300.0, 0.0, 10.0);
+
 	if(weighingTime <= 4000)// Light weight
 	{
-		printf("Light weight.\n\r");
+		//printf("Light weight.\n\r");
+		blockType = 1;
 		gotoXY(0,-300);
 		waitForArmMovement();
 		_delay_ms(500);
 		openGripper(1);
+		pickedUp = 0;
 		_delay_ms(500);
 	}
 	else // Heavy weight
 	{
-		printf("Heavy weight.\n\r");
+		//printf("Heavy weight.\n\r");
+		blockType = 2;
 		gotoXY(30, -200);
 		waitForArmMovement();
 		_delay_ms(500);
 		openGripper(1);
+		pickedUp = 0;
 		_delay_ms(500);
 	}
 }
@@ -230,6 +256,7 @@ int main(void)
 		openGripper(1);
 		gotoXY(30, -220);
 		waitForArmMovement();
+		_delay_ms(50);
 		setServo(0, 0);
 		pickupInfo info = calcPickupInfo();
 		_delay_ms((int)info.time);
@@ -237,6 +264,7 @@ int main(void)
 		gotoXY((int)info.x, (int)info.y);
 		waitForArmMovement();
 		closeGripper(1);
+		pickedUp = 1;
 		_delay_ms(500);
 		gotoXY(30, -220);
 		waitForArmMovement();
@@ -245,12 +273,12 @@ int main(void)
 		timerWeighingRoutine();
 	}
 
-	while(1)
-	{
-		int pos[2];
-		calcXY(pos);
-		printf("%d, %d", pos[0], pos[1]);
-		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
-		_delay_ms(100);
-	}
+//	while(1)
+//	{
+//		int pos[2];
+//		calcXY(pos);
+//		printf("%d, %d", pos[0], pos[1]);
+//		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
+//		_delay_ms(100);
+//	}
 }
