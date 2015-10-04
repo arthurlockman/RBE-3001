@@ -111,6 +111,40 @@ void driveLink(int link, long dir)
 	}
 }
 
+void driveLinkSlow(int link, long dir)
+{
+	if (dir > 4095)
+		dir = 4095;
+	if (dir < -4095)
+		dir = -4095;
+	dir = dir/5;
+	switch(link)
+	{
+	case 1:
+		if (dir >= 0)
+		{
+			setDAC(0, dir);
+			setDAC(1, 0);
+		} else
+		{
+			setDAC(0, 0);
+			setDAC(1, -dir);
+		}
+		break;
+	case 2:
+		if (dir >= 0)
+		{
+			setDAC(3, dir);
+			setDAC(2, 0);
+		} else
+		{
+			setDAC(3, 0);
+			setDAC(2, -dir);
+		}
+		break;
+	}
+}
+
 int readCurrentMilliamps(int link)
 {
 	int value;
