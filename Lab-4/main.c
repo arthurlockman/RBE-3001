@@ -90,7 +90,7 @@ int stableValue(int channel)
 
 	int i = 0;
 
-	while((hasTriggered == 0) || (IRDist(channel)!=startValue))
+	while((hasTriggered == 0) || ((int)average!=startValue))
 	{
 		// Moving average
 		vals[i%numVals] = IRDist(channel);
@@ -127,10 +127,9 @@ pickupInfo calcPickupInfo()
 	startIRVal_1 = stableValue(6);
 	long passTime1 = ms;
 
-	int tmp_y = - 175 - ((startIRVal_1) / 2.0 - 6.0) * 10;
-	int tmp_x = - 20.0 + (tmp_y + 175) * (-30.0/65.0) + 30;
-	gotoXY(tmp_x, tmp_y);
-
+//	int tmp_y = - 175 - ((startIRVal_1) / 2.0 - 6.0) * 10;
+//	int tmp_x = - 20.0 + (tmp_y + 175) * (-30.0/65.0) + 30;
+	gotoXY(30, -220);
 
 	startIRVal_2 = stableValue(7);
 	long passTime2 = ms;
@@ -138,17 +137,17 @@ pickupInfo calcPickupInfo()
 	printf("Start values: %d, %d\n\r", startIRVal_1, startIRVal_2);
 
 	deltaT = (int)(passTime2 - passTime1);
-	printf("Delta time: %d\n\r", deltaT);
+	// printf("Delta time: %d\n\r", deltaT);
 
 	float velocity = deltaX / (float)deltaT;
-	printf("Velocity: %f\n\r", velocity);
+	// printf("Velocity: %f\n\r", velocity);
 
 	float timeToPickup = distanceToArmCenter/velocity;
-	printf("Time: %f\n\r", timeToPickup);
+	// printf("Time: %f\n\r", timeToPickup);
 
 	pickupInfo info;
-	info.y = - 175 - ((startIRVal_1 + startIRVal_2) / 2.0 - 6.0) * 10;
-	info.x = - 18.0 + (info.y + 175) * (-20.0/65.0);
+	info.y = - 188 - ((startIRVal_1 + startIRVal_2) / 2.0 - 6.0) * 10;
+	info.x = - 20.0 + (info.y + 173) * (-27.0/65.0);
 	info.time = timeToPickup - 1000 + -175.0*(info.y + 175.0)/65.0;
 	return info;
 
@@ -156,35 +155,76 @@ pickupInfo calcPickupInfo()
 
 void waitForArmMovement()
 {
-	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 1, upperLinkSetpoint - 1) &&
+//	int maxCurrent = 0;
+	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 1, upperLinkSetpoint - 1) ||
 			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 1, lowerLinkSetpoint - 1))
-	;
+	{
+//		int current = readCurrentMilliamps(1) + readCurrentMilliamps(2);
+//		if(current > maxCurrent)
+//		{
+//			maxCurrent = current;
+//		}
+	}
+//	return maxCurrent;
 
 }
 
 int main(void)
 {
 	setup();
-	home();
-	openGripper(1);
-	gotoXY(30, -220);
-	waitForArmMovement();
-	setServo(0, 0);
-	pickupInfo info = calcPickupInfo();
-	_delay_ms((int)info.time);
-	printf("Pickup pos: %d, %d\n\r\n\r", (int)info.x, (int)info.y);
-	gotoXY((int)info.x, (int)info.y);
-	waitForArmMovement();
-	closeGripper(1);
-	_delay_ms(500);
-	gotoXY(30, -220);
-	waitForArmMovement();
+	while(1)
+	{
+		home();
+		openGripper(1);
+		gotoXY(30, -220);
+		waitForArmMovement();
+		setServo(0, 0);
+		pickupInfo info = calcPickupInfo();
+		_delay_ms((int)info.time);
+		//	printf("Pickup pos: %d, %d\n\r\n\r", (int)info.x, (int)info.y);
+		gotoXY((int)info.x, (int)info.y);
+		waitForArmMovement();
+		closeGripper(1);
+		_delay_ms(500);
+		gotoXY(30, -220);
+		waitForArmMovement();
+		// Weighing routine
+		gotoXY(30, -220);
+		waitForArmMovement();
+		gotoXY(30, -270);
+		waitForArmMovement();
+		long startTime = ms;
+		_delay_ms(500);
+		gotoXY(300, 0);
+		waitForArmMovement();
+		long weighingTime = ms - startTime;
+		printf("Time: %ld\n\r", weighingTime);
+		_delay_ms(1000);
+		if(weighingTime <= 2050)// Light weight
+		{
+			printf("Light weight.\n\r");
+			gotoXY(0,-300);
+			waitForArmMovement();
+			_delay_ms(500);
+			openGripper(1);
+			_delay_ms(500);
+		}
+		else // Heavy weight
+		{
+			printf("Heavy weight.\n\r");
+			gotoXY(30, -200);
+			waitForArmMovement();
+			_delay_ms(500);
+			openGripper(1);
+			_delay_ms(500);
+		}
+	}
 
 	while(1)
 	{
-//		int pos[2];
-//		calcXY(pos);
-//		printf("%d, %d", pos[0], pos[1]);
+		int pos[2];
+		calcXY(pos);
+		printf("%d, %d\n\r", pos[0], pos[1]);
 //		printf("\t\t%d, %d\n\r", IRDist(6), IRDist(7));
 //		_delay_ms(100);
 	}
