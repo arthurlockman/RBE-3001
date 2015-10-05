@@ -47,8 +47,9 @@ ISR(TIMER0_OVF_vect)
 		}
 		else
 		{
-			driveLinkSlow(2, pidOutputUpper);
-			driveLinkSlow(1, pidOutputLower);
+//			driveLinkSlow(2, pidOutputUpper);
+//			driveLinkSlow(1, pidOutputLower);
+			stopMotors();
 		}
 	}
 }
@@ -194,12 +195,14 @@ void waitForArmMovement()
 
 void timerWeighingRoutine()
 {
-	gotoAngles(-90,30);
+	gotoAngles(-70,0);
 	waitForArmMovement();
 	_delay_ms(500);
 	slow = 1;
 	long startTime = ms;
 	gotoAngles(-90,90);
+	int lowerLinkInit = lowerLinkActual;
+	int upperLinkInit = upperLinkActual;
 	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
 				!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
@@ -207,22 +210,13 @@ void timerWeighingRoutine()
 		if(ms - startTime > 5000)
 			break;
 	}
-	long weighingTime = ms - startTime;
-	// printf("Time: %ld\n\r", weighingTime);
+	int lowerLinkDiff = lowerLinkActual - lowerLinkInit;
+	int upperLinkDiff = upperLinkActual - upperLinkInit;
+	//printf("DTheta: %d\n\r", lowerLinkDiff + upperLinkDiff);
 	_delay_ms(1000);
 	slow = 0;
 
-//	// Shaking Routine
-//	setConst('U', 1000.0, 0.0, 0.0);
-//	setConst('L', 1000.0, 0.0, 0.0);
-//	gotoAngles(-90, 30);
-//	startTime = ms;
-//	while(ms - startTime < 5000)
-//		;
-//	setConst('U', 300.0, 0.0, 10.0);
-//	setConst('L', 300.0, 0.0, 10.0);
-
-	if(weighingTime <= 4000)// Light weight
+	if(lowerLinkDiff + upperLinkDiff > -10)// Light weight
 	{
 		//printf("Light weight.\n\r");
 		blockType = 1;
@@ -237,6 +231,8 @@ void timerWeighingRoutine()
 	{
 		//printf("Heavy weight.\n\r");
 		blockType = 2;
+		gotoAngles(-30,0);
+		waitForArmMovement();
 		gotoXY(30, -200);
 		waitForArmMovement();
 		_delay_ms(500);
@@ -263,6 +259,7 @@ int main(void)
 		//	printf("Pickup pos: %d, %d\n\r\n\r", (int)info.x, (int)info.y);
 		gotoXY((int)info.x, (int)info.y);
 		waitForArmMovement();
+		_delay_ms(100);
 		closeGripper(1);
 		pickedUp = 1;
 		_delay_ms(500);
