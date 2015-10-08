@@ -81,7 +81,7 @@ void home()
 
 	while(!IN_RANGE(upperLinkActual,91,89)|| !IN_RANGE(lowerLinkActual,91,89))
 	{
-		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
+		// printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 	}
 	_delay_ms(500);
 	resetEncCount(0);
@@ -137,7 +137,7 @@ int stableValue(int channel)
 	}
 	distance = min;
 	blockType = 0;
-	printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
+	// printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 	return min;
 }
 
@@ -172,11 +172,11 @@ pickupInfo calcPickupInfo()
 	// printf("Time: %f\n\r", timeToPickup);
 
 	pickupInfo info;
-	info.y = - 190 - ((startIRVal_1 + startIRVal_2) / 2.0 - 5.5) * 10;
-	info.x = - 20.0 + (info.y + 180) * (-35.0/62.0);
+	info.y = - 182 - ((startIRVal_1 + startIRVal_2) / 2.0 - 5.5) * 11;
+	info.x = - 15 + (info.y + 182) * (-27.0/66.0);
 	info.time = timeToPickup - 1100;// + -180*(info.y + 180.0)/62.0;
 	return info;
-
+	// -182, -7 to -248, 20
 }
 
 void waitForArmMovement()
@@ -185,7 +185,7 @@ void waitForArmMovement()
 	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
 			!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
-		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
+		// printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 		if(ms - startTime > 5000)
 			break;
 	}
@@ -206,7 +206,7 @@ void timerWeighingRoutine()
 	while (!IN_RANGE(upperLinkActual, upperLinkSetpoint + 2, upperLinkSetpoint - 2) ||
 				!IN_RANGE(lowerLinkActual, lowerLinkSetpoint + 2, lowerLinkSetpoint - 2))
 	{
-		printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
+		// printf("%d,%d,%d,%d,%d\n\r", lowerLinkActual, upperLinkActual, blockType, distance, pickedUp);
 		if(ms - startTime > 5000)
 			break;
 	}
@@ -255,9 +255,10 @@ int main(void)
 		_delay_ms(50);
 		setServo(0, 0);
 		pickupInfo info = calcPickupInfo();
+		gotoXYMatlab((int)info.x, (int)info.y);
 		_delay_ms((int)info.time);
 		//	printf("Pickup pos: %d, %d\n\r\n\r", (int)info.x, (int)info.y);
-		gotoXY((int)info.x, (int)info.y);
+		gotoXYMatlab((int)info.x, (int)info.y);
 		waitForArmMovement();
 		_delay_ms(100);
 		closeGripper(1);
