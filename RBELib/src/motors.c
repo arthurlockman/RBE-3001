@@ -77,6 +77,15 @@ void gotoXY(int x, int y)
 	}
 }
 
+void gotoXYMatlab(int x, int y)
+{
+	printf("%d,%d\n\r",x,y);
+	int lower = (getCharDebug() << 4) | getCharDebug();
+	int upper = (getCharDebug() << 4) | getCharDebug();
+	printf("%d, %d\n\r", lower, upper);
+	gotoAngles(lower, upper);
+}
+
 // TODO Implement different links
 void driveLink(int link, long dir)
 {

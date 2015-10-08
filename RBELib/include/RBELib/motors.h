@@ -68,4 +68,6 @@ void openGripper(int servoNum);
 
 void closeGripper(int servoNum);
 
+void gotoXYMatlab(int x, int y);
+
 #endif /* MOTORS_H_ */
